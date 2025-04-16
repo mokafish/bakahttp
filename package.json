@@ -1,0 +1,56 @@
+{
+	"name": "supports-color-cli",
+	"version": "0.0.0",
+	"description": "Detect whether a terminal supports color",
+	"license": "MIT",
+	"repository": "chalk/supports-color-cli",
+	"funding": "https://github.com/chalk/supports-color-cli?sponsor=1",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "https://sindresorhus.com"
+	},
+	"type": "module",
+	"bin": {
+		"hello-node": "./cli.js"
+	},
+	"engines": {
+		"node": ">=12"
+	},
+	"scripts": {
+		"test": "xo && ava"
+	},
+	"files": [
+		"cli.js"
+	],
+	"keywords": [
+		"cli-app",
+		"cli",
+		"color",
+		"colour",
+		"colors",
+		"terminal",
+		"console",
+		"ansi",
+		"styles",
+		"tty",
+		"rgb",
+		"256",
+		"shell",
+		"xterm",
+		"command-line",
+		"support",
+		"supports",
+		"capability",
+		"detect"
+	],
+	"dependencies": {
+		"meow": "^9.0.0",
+		"supports-color": "^9.0.0"
+	},
+	"devDependencies": {
+		"ava": "^3.15.0",
+		"execa": "^5.0.0",
+		"xo": "^0.38.2"
+	}
+}
