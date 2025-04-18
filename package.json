@@ -12,7 +12,7 @@
 	},
 	"type": "module",
 	"bin": {
-		"bakahttp": "./cli.js"
+		"bakahttp": "./dist/cli.js"
 	},
 	"engines": {
 		"node": ">=12"
