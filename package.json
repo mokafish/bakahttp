@@ -18,7 +18,7 @@
 		"node": ">=16"
 	},
 	"scripts": {
-		"build": "babel --out-dir=dist source",
+		"make": "babel --out-dir=dist source",
 		"dev": "babel --out-dir=dist --watch source",
 		"real-test": "prettier --check  --write  . && xo && ava",
 		"test": "echo pass"
