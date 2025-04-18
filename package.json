@@ -12,7 +12,7 @@
 	},
 	"type": "module",
 	"bin": {
-		"hello-node": "./cli.js"
+		"bakahttp": "./cli.js"
 	},
 	"engines": {
 		"node": ">=12"
