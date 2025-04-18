@@ -17,6 +17,10 @@ export async function start(name = 'sleep') {
     await task.init();
   }
   if (task.run) {
-    await task.run();
+    task.run();
   }
+  if (task.delay) {
+    task.delay();
+  }
+  return task.eventEmitter;
 }

@@ -1,3 +1,8 @@
+import EventEmitter from 'events';
+
+export const eventEmitter = new EventEmitter();
+export const emit = eventEmitter.emit.bind(eventEmitter);
+export const on = eventEmitter.on.bind(eventEmitter);
 
 export const options = {
     title: 'sleep',
@@ -8,11 +13,11 @@ export const options = {
 
 
 export async function init() {
-    console.log('init task');
+    emit('init.end', options);
 }
 
 export async function run() {
-    console.log('task main');
+    emit('run.main', options);
     await new Promise(resolve => setTimeout(resolve, 1000));
 }
 

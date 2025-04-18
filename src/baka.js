@@ -10,7 +10,7 @@ export async function load(name = 'sleep') {
             return await attempt();
         } catch (err) {
             if ('ERR_MODULE_NOT_FOUND' != err.code) {
-                throw err; 
+                throw err;
             }
         }
     }
@@ -26,6 +26,13 @@ export async function start(name = 'sleep') {
     }
 
     if (task.run) {
-        await task.run();
+        task.run();
     }
+
+    if (task.delay) {
+        task.delay();
+    }
+
+
+    return task.eventEmitter;
 }
