@@ -3,6 +3,7 @@ import React from 'react';
 import { render } from 'ink';
 import meow from 'meow';
 import App from './app.js';
+import * as baka from './baka.js';
 const cli = meow(`
 		Usage
 		  $ bakahttp
@@ -16,6 +17,7 @@ const cli = meow(`
 	`, {
   importMeta: import.meta
 });
+let bk = await baka.start();
 render(/*#__PURE__*/React.createElement(App, {
   name: cli.flags.name
 }));

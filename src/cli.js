@@ -4,6 +4,8 @@ import {render} from 'ink';
 import meow from 'meow';
 import App from './app.js';
 
+import * as baka from './baka.js';
+
 const cli = meow(
 	`
 		Usage
@@ -21,4 +23,5 @@ const cli = meow(
 	},
 );
 
+let bk = await baka.start();
 render(<App name={cli.flags.name} />);
