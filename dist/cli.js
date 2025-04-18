@@ -33,6 +33,6 @@ const level = flags['256'] ? 'has256' : (flags['16m'] ? 'has16m' : 'hasBasic');
 
 console.log('hello world');
 console.log(level);
-console.log('\n// dist/cli.js');
+console.log('\n// dist/cli.js ok');
 
 
