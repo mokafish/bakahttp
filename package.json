@@ -18,8 +18,8 @@
 		"node": ">=16"
 	},
 	"scripts": {
-		"make": "babel --out-dir=dist source",
-		"dev": "babel --out-dir=dist --watch source",
+		"make": "babel --out-dir=dist src",
+		"dev": "babel --out-dir=dist --watch src",
 		"real-test": "prettier --check  --write  . && xo && ava",
 		"test": "echo pass"
 	},
