@@ -14,9 +14,21 @@ const cli = meow(`
 	  $ bakahttp --16m
 
 	Exits with code 0 if color is supported and 1 if not
-`);
+`, {
+	importMeta: import.meta,
+	flags: {
+		'256': {
+			type: 'boolean',
+			default: false,
+		},
+		'16m': {
+			type: 'boolean',
+			default: false,
+		}
+	}
+});
 
-const {flags} = cli;
+const { flags } = cli;
 const level = flags['256'] ? 'has256' : (flags['16m'] ? 'has16m' : 'hasBasic');
 
 console.log('hello world');
