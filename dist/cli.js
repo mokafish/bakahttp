@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 import meow from 'meow';
-import supportsColor from 'supports-color';
-
 const cli = meow(`
 	Usage
 	  $ supports-color
@@ -19,10 +17,8 @@ const cli = meow(`
 `);
 
 const {flags} = cli;
-const level = flags['256'] ? 'has256' : (flags['16m'] ? 'has16m' : 'hasBasic');
-
 console.log('hello world');
-console.log(level);
-console.log('\n// dist/cli.js');
+console.log(flags);
+console.log('\n// dist/cli.js (2)');
 
 
