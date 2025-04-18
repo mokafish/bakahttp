@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import React from 'react';
-import { render } from 'ink';
+import {render} from 'ink';
 import meow from 'meow';
 import App from './app.js';
-const cli = meow(`
+
+const cli = meow(
+	`
 		Usage
 		  $ bakahttp
 
@@ -13,9 +15,10 @@ const cli = meow(`
 		Examples
 		  $ bakahttp --name=Jane
 		  Hello, Jane
-	`, {
-  importMeta: import.meta
-});
-render(/*#__PURE__*/React.createElement(App, {
-  name: cli.flags.name
-}));
+	`,
+	{
+		importMeta: import.meta,
+	},
+);
+
+render(<App name={cli.flags.name} />);
