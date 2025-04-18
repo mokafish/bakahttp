@@ -24,7 +24,7 @@
 		"test": "echo pass"
 	},
 	"files": [
-		"cli.js"
+		"dist"
 	],
 	"keywords": [
 		"cli-app",
