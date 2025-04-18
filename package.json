@@ -1,58 +1,56 @@
 {
-	"name": "bakahttp",
+	"name": "supports-color-cli",
 	"version": "0.0.0",
+	"description": "Detect whether a terminal supports color",
 	"license": "MIT",
-	"bin": "dist/cli.js",
+	"repository": "chalk/supports-color-cli",
+	"funding": "https://github.com/chalk/supports-color-cli?sponsor=1",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "https://sindresorhus.com"
+	},
 	"type": "module",
+	"bin": {
+		"hello-node": "./cli.js"
+	},
 	"engines": {
-		"node": ">=16"
+		"node": ">=12"
 	},
 	"scripts": {
-		"build": "babel --out-dir=dist source",
-		"dev": "babel --out-dir=dist --watch source",
-		"test": "echo pass"
+		"test": "xo && ava"
 	},
 	"files": [
-		"dist"
+		"cli.js"
+	],
+	"keywords": [
+		"cli-app",
+		"cli",
+		"color",
+		"colour",
+		"colors",
+		"terminal",
+		"console",
+		"ansi",
+		"styles",
+		"tty",
+		"rgb",
+		"256",
+		"shell",
+		"xterm",
+		"command-line",
+		"support",
+		"supports",
+		"capability",
+		"detect"
 	],
 	"dependencies": {
-		"ink": "^5.2.0",
-		"meow": "^13.2.0",
-		"react": "^19.1.0"
+		"meow": "^9.0.0",
+		"supports-color": "^9.0.0"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.27.0",
-		"@babel/preset-react": "^7.26.3",
-		"@vdemedes/prettier-config": "^2.0.1",
-		"ava": "^6.2.0",
-		"chalk": "^5.4.1",
-		"eslint-config-xo-react": "^0.28.0",
-		"eslint-plugin-react": "^7.37.5",
-		"eslint-plugin-react-hooks": "^5.2.0",
-		"import-jsx": "^5.0.0",
-		"ink-testing-library": "^4.0.0",
-		"prettier": "^3.5.3",
-		"xo": "^0.60.0"
-	},
-	"ava": {
-		"environmentVariables": {
-			"NODE_NO_WARNINGS": "1"
-		},
-		"nodeArguments": [
-			"--loader=import-jsx"
-		]
-	},
-	"xo": {
-		"extends": "xo-react",
-		"prettier": true,
-		"rules": {
-			"react/prop-types": "off"
-		}
-	},
-	"prettier": "@vdemedes/prettier-config",
-	"babel": {
-		"presets": [
-			"@babel/preset-react"
-		]
+		"ava": "^3.15.0",
+		"execa": "^5.0.0",
+		"xo": "^0.38.2"
 	}
 }
