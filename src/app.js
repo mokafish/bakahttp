@@ -1,10 +1,13 @@
 import React from 'react';
-import {Text} from 'ink';
+import { Box, Text } from 'ink';
 
-export default function App({name = 'Stranger'}) {
+export default function App({ name = 'Stranger' }) {
 	return (
-		<Text>
-			Hello, <Text color="green">{name}</Text>
-		</Text>
+		<Box height={10}>
+			<Text>
+				Hello, <Text color="green">{name}</Text>
+			</Text>
+		</Box>
+
 	);
 }
