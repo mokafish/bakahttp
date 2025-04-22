@@ -17,8 +17,7 @@ const cli = meow(`
 	`, {
   importMeta: import.meta
 });
-let task = await baka.start();
+let bk = await baka.start();
 render(/*#__PURE__*/React.createElement(App, {
-  name: cli.flags.name,
-  task: task
+  task: bk.task
 }));

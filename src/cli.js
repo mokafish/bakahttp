@@ -23,5 +23,5 @@ const cli = meow(
 	},
 );
 
-let task = await baka.start();
-render(<App name={cli.flags.name} task={task} />);
+let bk = await baka.start();
+render(<App task={bk.task} />);
