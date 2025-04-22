@@ -33,26 +33,51 @@ export async function start(name = 'sleep') {
     o.max_concurrent = t.max_concurrent || 16;
     o.history_results = new Denque({ capacity: t.max_cache_results });
     o.history_errors = new Denque({ capacity: t.max_cache_errors });
-    o.alive_datas = new Denque({ capacity: o.max_concurrent });
+    o.running_set = new Set();
 
-
-    o.alives = 0;
     o.total_results = 0;
     o.total_errors = 0;
+
+    t.on('run', (data) => {
+        o.running_set.add(data);
+        t.emit('submit', data);
+    });
+    t.on('run.ok', (data) => {
+        o.total_results++;
+        o.history_results.push(data);
+        t.emit('cache.ok', data);
+    });
+    t.on('run.err', (data, err) => {
+        o.total_errors++;
+        o.history_errors.push(err);
+        t.emit('cache.err', data);
+
+    });
+    t.on('run.end', (data) => {
+        o.running_set.delete(data);
+    });
+
+
     o.pickup = async () => {
         while (true) {
-            if (o.alives >= o.max_concurrent) {
-                return;
+            if (o.running_set.size >= o.max_concurrent) {
+                continue;
             }
 
-            o.alives++;
-            o.task.run().then(() => {
-                o.total_results++;
-            }).catch((err) => {
+            o.task.run().catch((err) => {
                 o.total_errors++;
-            }).finally(() => {
-                o.alives--;
+                o.history_errors.push(err);
             });
+
+            // .then(() => {
+            //     o.total_results++;
+            // }).catch((err) => {
+            //     o.total_errors++;
+            // }).finally(() => {
+            //     o.alive_set.delete(id);
+            // });
+
+            await task.tick();
         }
     }
 
@@ -62,7 +87,7 @@ export async function start(name = 'sleep') {
     if (task.check) {
         o.check_timer = setInterval(async () => {
             await task.check();
-        }, task.check_interval || 1000);
+        }, t.check_interval || 1000);
     }
 
     return o;

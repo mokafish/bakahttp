@@ -1,11 +1,25 @@
 import React, { useEffect } from 'react';
 import { Box, Text } from 'ink';
 
-export default function App({ task }) {
+export default function App({ task, o }) {
 	const [state, dispatch] = React.useReducer((state, action) => {
 		switch (action.type) {
 			case 'init':
 				return { ...state, ...action.payload };
+			case 'echo':
+				let b = state.echo_buffer;
+				if (b.length > 5) {
+					b = b.slice(1);
+				}
+				return {
+					...state,
+					echo_buffer: [...b, action.payload],
+				};
+			case 'submit':
+				return {
+					...state,
+					running_list: mySlice(o.running_set, 10),
+				};
 			default:
 				return state;
 		}
@@ -16,37 +30,66 @@ export default function App({ task }) {
 		max_cache_results: 0,
 		max_cache_errors: 0,
 		check_interval: 0,
+		echo_buffer: [],
+		running_list: [[], [], 0],
 	});
 
 	const t = task.t;
-
-	t.on('init.end', (data) => {
-		dispatch({ type: 'init', payload: data });
-	});
-
 	useEffect(() => {
-
+		dispatch({ type: 'init', payload: t });
+		t.on('init.end', (data) => {
+			dispatch({ type: 'init', payload: data });
+		});
+		t.on('echo', (...data) => {
+			dispatch({ type: 'echo', payload: data.join(' ') });
+		});
+		t.on('run', (data) => {
+			t.emit('echo', `run ${data.title}`);
+		});
+		t.on('run.end', (data) => {
+			t.emit('echo', `done ${data.title}`);
+		});
+		t.on('submit', (data) => {
+			dispatch({ type: 'submit', payload: data });
+		});
 	}, [t]);
 	return (
-		<Box height={10} flexDirection="column">
-			<Box height={5}>
-				<Text>
-					Task: <Text color="green">{state.name}</Text>
+		<Box height="auto" flexDirection="column">
+			<Text>
+				Task: <Text color="green">{state.name}</Text>
+				{'    '}
+				<Text color="gray">{state.info}</Text>
 				</Text>
-
-				<Text>
-					{'    '}
-					<Text color="gray">{state.info}</Text>
-				</Text>
+			<Box height={10} flexDirection="column">
+				{state.running_list[0].map((v, i) => <Text key={i}>
+					<Text color="blue">{v.title}</Text>
+				</Text>)}
+				{state.running_list[2]!=0 && <Text>
+					<Text color="gray">...{state.running_list[2]} items hidden</Text>
+				</Text>}
+				{state.running_list[1].map((v, i) => <Text key={i}>
+					<Text color="blue">{v.title}</Text>
+				</Text>)}
+				
 			</Box>
-			<Box height={5}  flexDirection="column">
-				{Object.keys(task).map((key) => (
-					<Text key={key}>
-						{key}: <Text color="gray">{task[key] + ''}</Text>
+			<Box height={5} flexDirection="column">
+				{state.echo_buffer.map((v, i) => (
+					<Text key={i}>
+						<Text color="gray">{v}</Text>
 					</Text>
 				))}
 			</Box>
 		</Box>
 
 	);
+}
+
+function mySlice(arr, n) {
+	const a = [...arr];
+	if (a.length <= n) {
+		return [a, [], 0];
+	}
+	const l = Math.floor(--n / 2);
+	const r = -(l + n % 2);
+	return [a.slice(0, l), a.slice(r), a.length - n];
 }

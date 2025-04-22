@@ -19,5 +19,6 @@ const cli = meow(`
 });
 let bk = await baka.start();
 render(/*#__PURE__*/React.createElement(App, {
-  task: bk.task
+  task: bk.task,
+  o: bk
 }));

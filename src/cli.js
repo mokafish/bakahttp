@@ -24,4 +24,4 @@ const cli = meow(
 );
 
 let bk = await baka.start();
-render(<App task={bk.task} />);
+render(<App task={bk.task} o={bk} />);

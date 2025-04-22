@@ -1,14 +1,14 @@
 import EventEmitter from 'events';
 
-// 程序钩子
+/******* 脚本钩子 *******/ 
 export const t = new EventEmitter(); 
 export async function init() {
     t.name = 'sleep';
     t.info = 'sleep task for test';
-    t.max_concurrent = 10;
+    t.max_concurrent = 16;
     t.max_cache_results = 100;
     t.max_cache_errors = 100;
-    t.check_interval = 1000; 
+    t.check_interval = 5000; 
 
     t.emit('init.end', t);
 }
@@ -17,12 +17,13 @@ export async function init() {
 export async function run() {
     const id = mkid();
     const data = {
+        id,
         title: `${t.name} ${id}`,
     };
 
     t.emit('run', data);
     try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 20*1000));
         t.emit('run.ok', data);
     }
     catch (err) {
