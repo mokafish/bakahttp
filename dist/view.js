@@ -7,28 +7,28 @@ import { ManagerModel } from './models.js';
  * @param {{baka:ManagerModel}} props 
  * @returns 
  */
-export default function App({ baka }) {
-  const [state, setState] = React.useReducer((prev, next) => ({ ...prev, ...next }), {
+export default function App({
+  baka
+}) {
+  const [state, setState] = React.useReducer((prev, next) => ({
+    ...prev,
+    ...next
+  }), {
     // TODO: add more state variables as needed
-    config: baka.config,
+    config: baka.config
   });
-
   useEffect(() => {
     // TODO: add event listeners to update state
   }, [baka]);
-  return (
-    <Box height="auto" flexDirection="column">
-      <Text>
-        Task: <Text color="green">{state.config.name}</Text>
-        {'    '}
-        <Text color="gray">{state.config.description}</Text>
-      </Text>
-
-    </Box>
-
-  );
+  return /*#__PURE__*/React.createElement(Box, {
+    height: "auto",
+    flexDirection: "column"
+  }, /*#__PURE__*/React.createElement(Text, null, "Task: ", /*#__PURE__*/React.createElement(Text, {
+    color: "green"
+  }, state.config.name), '    ', /*#__PURE__*/React.createElement(Text, {
+    color: "gray"
+  }, state.config.description)));
 }
-
 function mySlice(arr, n) {
   const a = [...arr];
   if (a.length <= n) {

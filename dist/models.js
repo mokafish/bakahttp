@@ -35,7 +35,6 @@ import Denque from 'denque';
  * @description 当任务失败时触发
  */
 
-
 /**
  * @event BaseTaskModel#err
  * @param {Error} error - 发生的错误对象
@@ -67,7 +66,7 @@ export class BaseTaskModel extends EventEmitter {
     breakTimeBase: 1000,
     breakTimeMaxAddendum: 4000,
     pickupCount: 1,
-    pickupCountMaxAddendum: 0,
+    pickupCountMaxAddendum: 0
   };
 
   /**
@@ -157,7 +156,7 @@ export class BaseTaskModel extends EventEmitter {
    * 任务清理方法（可选实现）
    * @async
    */
-  async cleanup() { }
+  async cleanup() {}
 
   /**
    * 更新时间统计信息
@@ -189,7 +188,7 @@ export class BaseTaskModel extends EventEmitter {
         m.set(x, 1);
       }
       return m.get(x);
-    }
+    };
   }
 
   /** @static @type {function(any=):number} 顺序id生成器 */
@@ -215,7 +214,7 @@ export class BaseTaskModel extends EventEmitter {
    */
   static async breakTime() {
     let n = Math.random() * this.config.breakTimeMaxAddendum + this.config.breakTimeBase;
-    return await new Promise((resolve) => {
+    return await new Promise(resolve => {
       setTimeout(() => {
         resolve();
       }, n);
@@ -246,7 +245,6 @@ export class BaseTaskModel extends EventEmitter {
  * @extends EventEmitter
  */
 export class ManagerModel extends EventEmitter {
-
   /**
    * @param {typeof BaseTaskModel} TaskFactoryClass - 任务工厂类，用于创建任务实例
    * @param {TaskConfig} [overConfig={}] - 任务配置覆盖对象
@@ -256,7 +254,10 @@ export class ManagerModel extends EventEmitter {
     /** @member {typeof BaseTaskModel} TaskFactoryClass - 任务工厂类 */
     this.TaskFactoryClass = TaskFactoryClass;
     /** @member {TaskConfig} config - 合并后的任务配置 */
-    this.config = { ...TaskFactoryClass?.config, ...overConfig };
+    this.config = {
+      ...TaskFactoryClass?.config,
+      ...overConfig
+    };
     /** @member {boolean} running - 管理器运行状态 */
     this.running = false;
     /** @member {Object} sheet - 任务状态存储对象 */
@@ -264,9 +265,13 @@ export class ManagerModel extends EventEmitter {
       /** @member {Set<BaseTaskModel>} alives - 存活中的任务集合 */
       alives: new Set(),
       /** @member {Denque} results - 成功任务结果队列 */
-      results: new Denque({ capacity: this.config.maxResultCache }),
+      results: new Denque({
+        capacity: this.config.maxResultCache
+      }),
       /** @member {Denque} errors - 失败任务错误队列 */
-      errors: new Denque({ capacity: this.config.maxErrorCache }),
+      errors: new Denque({
+        capacity: this.config.maxErrorCache
+      })
     };
     /** @member {Object} stats - 任务统计信息 */
     this.stats = {
@@ -277,7 +282,7 @@ export class ManagerModel extends EventEmitter {
       /** @member {number} fail - 失败任务数 */
       fail: 0,
       /** @member {number} err - 错误任务数 */
-      err: 0,
+      err: 0
     };
     /** @member {number|null} healthCheckTimer - 健康检查定时器ID */
     this.healthCheckTimer = null;
@@ -287,7 +292,7 @@ export class ManagerModel extends EventEmitter {
    * 初始化管理器
    * @async
    */
-  async initialize() { 
+  async initialize() {
     this.emit('initialized');
   }
 
@@ -306,11 +311,11 @@ export class ManagerModel extends EventEmitter {
       this.stats.ok++;
       this.sheet.results.push(task);
     });
-    task.on('fail', (err) => {
+    task.on('fail', err => {
       this.stats.fail++;
       this.sheet.results.push(err);
     });
-    task.on('err', (err) => {
+    task.on('err', err => {
       this.stats.err++;
       this.sheet.errors.push(err);
     });
@@ -319,10 +324,8 @@ export class ManagerModel extends EventEmitter {
       this.stats.total++;
       this.emit('popup', task);
     });
-
     await task._initialize();
     this.emit('pickup', task);
-
     return task;
   }
 
@@ -335,16 +338,13 @@ export class ManagerModel extends EventEmitter {
     if (this.running) return;
     this.running = true;
 
-
     // 任务接取循环
     while (this.running) {
-      let count = Math.floor(
-        Math.random() * this.config.pickupCountMaxAddendum + this.config.pickupCount
-      );
+      let count = Math.floor(Math.random() * this.config.pickupCountMaxAddendum + this.config.pickupCount);
       for (let i = 0; i < count; i++) {
         if (this.sheet.alives.size < this.config.maxConcurrent) {
           let task = await this.pickup();
-          task._run().catch((err) => {
+          task._run().catch(err => {
             task.emit('err', err);
             task.emit('end');
           });
@@ -352,19 +352,13 @@ export class ManagerModel extends EventEmitter {
       }
       await this.TaskFactoryClass.breakTime();
     }
-
     this.emit('start');
 
     // 健康检查定时器
     this.healthCheckTimer = setInterval(async () => {
-      const health = await this.TaskFactoryClass.check(
-        Array.from(this.sheet.alives.values()),
-        this.sheet.results.toArray(),
-        this.sheet.errors.toArray()
-      );
+      const health = await this.TaskFactoryClass.check(Array.from(this.sheet.alives.values()), this.sheet.results.toArray(), this.sheet.errors.toArray());
       this.emit('check', health);
     }, this.config.checkTime);
-
   }
 
   /**

@@ -19,7 +19,9 @@
 	},
 	"scripts": {
 		"make": "babel --out-dir=dist src",
+		"make2": "babel --out-dir=dist src2",
 		"dev": "babel --out-dir=dist --watch src",
+		"dev2": "babel --out-dir=dist --watch src2",
 		"real-test": "prettier --check  --write  . && xo && ava",
 		"test": "echo pass"
 	},

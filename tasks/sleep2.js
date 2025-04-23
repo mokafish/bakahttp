@@ -1,62 +1,76 @@
-import { TaskBase } from './TaskBase.js';
+import { BaseTaskModel } from './models.js';
 
-export default class SleepTask extends TaskBase {
-  static DEFAULT_CONFIG = {
-    ...super.DEFAULT_CONFIG,
+/**
+ * 休眠测试任务类，用于验证任务调度系统的并发处理能力
+ * @extends BaseTaskModel
+ */
+export class SleepTask extends BaseTaskModel {
+  /**
+   * 任务配置信息
+   * @static
+   * @type {TaskConfig}
+   */
+  static config = {
+    ...BaseTaskModel.config,
     name: 'sleep',
-    description: 'Delayed execution task',
-    maxConcurrent: 10,
-    delayRange: [1000, 5000]
+    description: '随机休眠测试任务',
+    maxConcurrent: 5,      // 降低并发数方便观察效果
+    maxResultCache: 200,
+    checkTime: 5000        // 缩短健康检查间隔
   };
 
-  constructor(config) {
-    super(config);
-    this.counter = 0;
+  /**
+   * 初始化休眠任务
+   * @async
+   * @override
+   */
+  async initialize() {
+    // 生成随机参数
+    /** @member {number} duration - 实际休眠时长（毫秒） */
+    this.duration = Math.floor(Math.random() * 15000 + 5000);
+    /** @member {number} startTime - 精确执行开始时间戳 */
+    this.startTime = performance.now();
   }
 
-  async execute() {
-    const taskId = this._generateId();
-    try {
-      this.emit('taskStart', taskId);
-      
-      const delay = this._calculateDelay();
-      await new Promise(resolve => 
-        setTimeout(resolve, delay)
-      );
-      
-      const result = this.formatResult({
-        id: taskId,
-        delay,
-        status: 'success'
+  /**
+   * 执行随机休眠
+   * @async
+   * @override
+   * @emits SleepTask#progress
+   */
+  async run() {
+    // 分阶段休眠（每1秒触发进度事件）
+    const steps = Math.floor(this.duration / 1000);
+    for (let i = 1; i <= steps; i++) {
+      await new Promise(r => setTimeout(r, 1000));
+      /**
+       * @event SleepTask#progress
+       * @type {object}
+       * @property {number} current 当前进度(秒)
+       * @property {number} total 总时长(秒)
+       */
+      this.emit('progress', { 
+        current: i, 
+        total: steps,
+        elapsed: performance.now() - this.startTime
       });
-      
-      this.emit('taskSuccess', result);
-      return result;
-    } catch (error) {
-      const errorResult = this.formatResult({
-        id: taskId,
-        error: error.message,
-        status: 'failed'
-      });
-      
-      this.emit('taskError', errorResult);
-      throw error;
-    } finally {
-      this.emit('taskEnd', taskId);
+    }
+
+    // 处理剩余时间
+    const remaining = this.duration % 1000;
+    if (remaining > 0) {
+      await new Promise(r => setTimeout(r, remaining));
     }
   }
 
-  _generateId() {
-    return `${this.config.name}-${++this.counter}`;
+  /**
+   * 任务清理
+   * @async
+   * @override
+   */
+  async cleanup() {
+    // 记录完整执行时长
+    /** @member {number} preciseDuration - 精确执行时长 */
+    this.preciseDuration = performance.now() - this.startTime;
   }
-
-  _calculateDelay() {
-    const [min, max] = this.config.delayRange;
-    return Math.floor(Math.random() * (max - min)) + min;
-  }
-}
-
-// 工厂函数便于使用
-export function createSleepTask(config) {
-  return new SleepTask(config);
 }

@@ -3,7 +3,7 @@ import meow from 'meow';
 import React from 'react';
 import { render } from 'ink';
 import App from './view.js';
-import pkg from '../package.json' with { type: 'json' };
+import pkg from '../package.json' with  { type: 'json' };
 import { loadTask } from './services.js';
 import { ManagerModel } from './models.js';
 
@@ -28,11 +28,10 @@ const cli = meow(`
     }
   }
 });
+
 let taskName = cli.input[0] || 'sleep2';
 let taskModule = await loadTask(taskName);
-let taskClass = taskModule.default;
-let bakaManager = new ManagerModel(taskClass, {});
+let taskClass =  taskModule.default 
+let bakaManager = new ManagerModel(taskClass, {})
 await bakaManager.initialize();
-render(/*#__PURE__*/React.createElement(App, {
-  baka: bakaManager
-}));
+render(<App baka={bakaManager} />);
