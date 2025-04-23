@@ -1,17 +1,50 @@
 import EventEmitter from 'events';
 import Denque from 'denque';
+
 /**
  * @typedef {Object} TaskConfig
-  * @property {string} name - 任务类型名称
-  * @property {string} description - 任务类型描述
-  * @property {number} maxConcurrent - 最大并发任务数
-  * @property {number} maxResultCache - 最大结果缓存数量
-  * @property {number} maxErrorCache - 最大错误缓存数量
-  * @property {number} checkTime - 健康检查间隔（毫秒）
-  * @property {number} breakTimeBase - 基础间隔时间（毫秒）
-  * @property {number} breakTimeMaxAddendum - 最大随机间隔附加时间（毫秒）
-  * @property {number} pickupCount - 单个接取周期内的任务提取数量
-  * @property {number} pickupCountMaxAddendum - 单个接取周期内的任务提取数量附加值
+ * @property {string} name - 任务类型名称
+ * @property {string} description - 任务类型描述
+ * @property {number} maxConcurrent - 最大并发任务数
+ * @property {number} maxResultCache - 最大结果缓存数量
+ * @property {number} maxErrorCache - 最大错误缓存数量
+ * @property {number} checkTime - 健康检查间隔（毫秒）
+ * @property {number} breakTimeBase - 基础间隔时间（毫秒）
+ * @property {number} breakTimeMaxAddendum - 最大随机间隔附加时间（毫秒）
+ * @property {number} pickupCount - 单个接取周期内的任务提取数量
+ * @property {number} pickupCountMaxAddendum - 单个接取周期内的任务提取数量附加值
+ */
+
+/**
+ * @event BaseTaskModel#initialized
+ * @description 当任务初始化完成时触发
+ */
+
+/**
+ * @event BaseTaskModel#start
+ * @description 当任务开始执行时触发
+ */
+
+/**
+ * @event BaseTaskModel#ok
+ * @description 当任务成功完成时触发
+ */
+
+/**
+ * @event BaseTaskModel#ok
+ * @description 当任务失败时触发
+ */
+
+
+/**
+ * @event BaseTaskModel#err
+ * @param {Error} error - 发生的错误对象
+ * @description 当任务执行过程中发生错误时触发
+ */
+
+/**
+ * @event BaseTaskModel#end
+ * @description 当任务执行结束时触发
  */
 
 /**
@@ -21,9 +54,9 @@ import Denque from 'denque';
 export class BaseTaskModel extends EventEmitter {
   /**
    * 任务配置信息
-   * @static
    * @type {TaskConfig}
-  */
+   * @static
+   */
   static config = {
     name: 'base',
     description: 'base task',
@@ -46,7 +79,7 @@ export class BaseTaskModel extends EventEmitter {
     /** @member {Object} props - 任务自定义属性存储对象 */
     this.props = {};
     /** @member {number} tid - 唯一任务ID */
-    this.tid = BaseTaskModel.seqNext();
+    this.tid = BaseTaskModel.nextID();
     /** @member {string} title - 任务标题，格式：'base task {tid}' */
     this.title = `base task ${this.tid}`;
     /** @member {string} note - 任务备注信息 */
@@ -105,7 +138,7 @@ export class BaseTaskModel extends EventEmitter {
   async _run() {
     this.start_time = Date.now();
     this.state = 'running';
-    this.emit('start', this.tid);
+    this.emit('start');
     try {
       await this.run();
       this.emit('ok');
@@ -129,7 +162,7 @@ export class BaseTaskModel extends EventEmitter {
   /**
    * 更新时间统计信息
    */
-  async _updateUsedTime() {
+  _updateUsedTime() {
     if (this.state === 'running') {
       this.used_time = (Date.now() - this.start_time) / 1000;
     } else if (this.state === 'end') {
@@ -159,8 +192,8 @@ export class BaseTaskModel extends EventEmitter {
     }
   }
 
-  /** @static @type {function(any=):number} 任务ID生成器 */
-  static seqNext = BaseTaskModel.autoincrement();
+  /** @static @type {function(any=):number} 顺序id生成器 */
+  static nextID = BaseTaskModel.autoincrement();
 
   /**
    * 健康检查方法（可选实现）
@@ -190,6 +223,23 @@ export class BaseTaskModel extends EventEmitter {
   }
 }
 
+/**
+ * @event ManagerModel#pickup
+ * @param {BaseTaskModel} task - 被接取的任务实例
+ * @description 当接取一个新任务时触发
+ */
+
+/**
+ * @event ManagerModel#popup
+ * @param {BaseTaskModel} task - 结束的任务实例
+ * @description 当任务完成并从存活列表中移除时触发
+ */
+
+/**
+ * @event ManagerModel#check
+ * @param {any} health - 健康检查的结果
+ * @description 当执行健康检查时触发
+ */
 
 /**
  * 任务管理器模型类，负责管理任务的生命周期和状态
@@ -198,40 +248,53 @@ export class BaseTaskModel extends EventEmitter {
 export class ManagerModel extends EventEmitter {
 
   /**
-   *  
-   * @param {Class} TaskFactoryClass - 任务工厂类，用于创建任务实例
+   * @param {typeof BaseTaskModel} TaskFactoryClass - 任务工厂类，用于创建任务实例
    * @param {TaskConfig} [overConfig={}] - 任务配置覆盖对象
    */
   constructor(TaskFactoryClass, overConfig = {}) {
     super();
-    /** @member {Class} TaskFactoryClass - 任务工厂类 */
+    /** @member {typeof BaseTaskModel} TaskFactoryClass - 任务工厂类 */
     this.TaskFactoryClass = TaskFactoryClass;
+    /** @member {TaskConfig} config - 合并后的任务配置 */
     this.config = { ...TaskFactoryClass?.config, ...overConfig };
+    /** @member {boolean} running - 管理器运行状态 */
     this.running = false;
+    /** @member {Object} sheet - 任务状态存储对象 */
     this.sheet = {
+      /** @member {Set<BaseTaskModel>} alives - 存活中的任务集合 */
       alives: new Set(),
+      /** @member {Denque} results - 成功任务结果队列 */
       results: new Denque({ capacity: this.config.maxResultCache }),
+      /** @member {Denque} errors - 失败任务错误队列 */
       errors: new Denque({ capacity: this.config.maxErrorCache }),
-
     };
+    /** @member {Object} stats - 任务统计信息 */
     this.stats = {
+      /** @member {number} total - 总任务数 */
       total: 0,
+      /** @member {number} ok - 成功任务数 */
       ok: 0,
+      /** @member {number} fail - 失败任务数 */
       fail: 0,
+      /** @member {number} err - 错误任务数 */
       err: 0,
-    }
+    };
+    /** @member {number|null} healthCheckTimer - 健康检查定时器ID */
+    this.healthCheckTimer = null;
   }
 
+  /**
+   * 初始化管理器
+   * @async
+   */
   async initialize() { }
 
   /**
    * 任务执行方法，创建并启动任务实例
    * @async
    * @returns {Promise<BaseTaskModel>} 返回创建的任务实例
-   * @emits BaseTaskModel#ok
-   * @emits BaseTaskModel#fail
-   * @emits BaseTaskModel#err
-   * @emits BaseTaskModel#end
+   * @emits ManagerModel#pickup
+   * @emits ManagerModel#popup
    */
   async pickup() {
     /** @type {BaseTaskModel} */
@@ -261,26 +324,34 @@ export class ManagerModel extends EventEmitter {
     return task;
   }
 
+  /**
+   * 启动任务管理器，开始周期性地接取和执行任务，并启动健康检查定时器
+   * @async
+   * @emits ManagerModel#check
+   */
   async start() {
-    if (this.running) return
+    if (this.running) return;
     this.running = true;
 
+
+    // 任务接取循环
     while (this.running) {
-      let count = Math.floor(Math.random() * this.config.pickupCountMaxAddendum + this.config.pickupCount);
+      let count = Math.floor(
+        Math.random() * this.config.pickupCountMaxAddendum + this.config.pickupCount
+      );
       for (let i = 0; i < count; i++) {
         if (this.sheet.alives.size < this.config.maxConcurrent) {
-          let task = await this.pickup(); // initialized
-          // 执行任务只处理未捕获的异常
+          let task = await this.pickup();
           task._run().catch((err) => {
             task.emit('err', err);
             task.emit('end');
           });
         }
       }
-      await this.TaskFactoryClass.breakTime(); // 等待随机时间
+      await this.TaskFactoryClass.breakTime();
     }
 
-
+    // 健康检查定时器
     this.healthCheckTimer = setInterval(async () => {
       const health = await this.TaskFactoryClass.check(
         Array.from(this.sheet.alives.values()),
@@ -288,9 +359,13 @@ export class ManagerModel extends EventEmitter {
         this.sheet.errors.toArray()
       );
       this.emit('check', health);
-    }, this.task.config.checkTime);
+    }, this.config.checkTime);
+
   }
 
+  /**
+   * 暂停任务管理器，停止接取新任务并清除健康检查定时器
+   */
   pause() {
     this.running = false;
     clearInterval(this.healthCheckTimer);
