@@ -1,5 +1,7 @@
 import BaseTask from './base.js';
-
+/**
+ * @typedef {import('./tasks/base.js').TaskConfig} TaskConfig
+ */
 
 /**
  * 休眠测试任务类，用于验证任务调度系统的并发处理能力
@@ -15,10 +17,9 @@ export default class SleepTask extends BaseTask {
     ...super.config,
     name: 'sleep',
     description: '随机休眠测试任务',
-    maxConcurrent: 5,      // 降低并发数方便观察效果
-    maxResultCache: 200,
-    breakTimeMaxAddendum: 500,
-    checkTime: 5000        // 缩短健康检查间隔
+    maxConcurrent: 12,      // 降低并发数方便观察效果
+    delayPlue: 500,
+    checkDelay: 5000        // 缩短健康检查间隔
   };
 
   /**

@@ -24,7 +24,7 @@ export default function App({ baka }) {
   });
 
   useEffect(() => {
-    baka.on('initialized', () => {
+    baka.on('init', () => {
       setState({ config: baka.config });
     });
     baka.on('pickup', (task) => {
@@ -44,11 +44,11 @@ export default function App({ baka }) {
   }, [baka]);
   return (
     <Box height="auto" flexDirection="column">
-      <Text>
-        Task: <Text color="green">{state.config.name}</Text>
-        {'    '}
-        <Text color="gray">{state.config.description}</Text>
-      </Text>
+      {Object.keys(state.config).map((key) =>
+        <Text key={key}>
+          <Text color="blue"> {key}:</Text>
+          <Text color="yellow"> {state.config[key]}</Text>
+        </Text>)}
       <StatsView {...state.stats} />
     </Box>
 

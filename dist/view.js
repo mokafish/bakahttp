@@ -28,7 +28,7 @@ export default function App({
     errors: []
   });
   useEffect(() => {
-    baka.on('initialized', () => {
+    baka.on('init', () => {
       setState({
         config: baka.config
       });
@@ -49,11 +49,13 @@ export default function App({
   return /*#__PURE__*/React.createElement(Box, {
     height: "auto",
     flexDirection: "column"
-  }, /*#__PURE__*/React.createElement(Text, null, "Task: ", /*#__PURE__*/React.createElement(Text, {
-    color: "green"
-  }, state.config.name), '    ', /*#__PURE__*/React.createElement(Text, {
-    color: "gray"
-  }, state.config.description)), /*#__PURE__*/React.createElement(StatsView, state.stats));
+  }, Object.keys(state.config).map(key => /*#__PURE__*/React.createElement(Text, {
+    key: key
+  }, /*#__PURE__*/React.createElement(Text, {
+    color: "blue"
+  }, " ", key, ":"), /*#__PURE__*/React.createElement(Text, {
+    color: "yellow"
+  }, " ", state.config[key]))), /*#__PURE__*/React.createElement(StatsView, state.stats));
 }
 function StatsView({
   total,
