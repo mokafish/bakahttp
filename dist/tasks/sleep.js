@@ -43,6 +43,10 @@ export default class SleepTask extends BaseTask {
    * @emits SleepTask#progress
    */
   async run() {
+    if (this.duration > 14000) {
+      throw new Error('Invalid duration');
+    }
+
     // 分阶段休眠（每1秒触发进度事件）
     const steps = Math.floor(this.duration / 1000);
     for (let i = 1; i <= steps; i++) {
