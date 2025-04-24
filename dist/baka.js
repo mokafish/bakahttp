@@ -58,11 +58,11 @@ export default class ManagerModel extends EventEmitter {
       /** @member {Set<BaseTask>} alives - 存活中的任务集合 */
       alives: new Set(),
       /** @member {Denque} results - 成功任务结果队列 */
-      results: new Denque({
+      results: new Denque([], {
         capacity: this.config.maxResultCache
       }),
       /** @member {Denque} errors - 失败任务错误队列 */
-      errors: new Denque({
+      errors: new Denque([], {
         capacity: this.config.maxErrorCache
       })
     };

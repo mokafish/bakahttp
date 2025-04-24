@@ -57,10 +57,10 @@ export default class ManagerModel extends EventEmitter {
       alives: new Set(),
 
       /** @member {Denque} results - 成功任务结果队列 */
-      results: new Denque({ capacity: this.config.maxResultCache }),
+      results: new Denque([], { capacity: this.config.maxResultCache }),
 
       /** @member {Denque} errors - 失败任务错误队列 */
-      errors: new Denque({ capacity: this.config.maxErrorCache }),
+      errors: new Denque([], { capacity: this.config.maxErrorCache }),
     };
 
     /** @member {Object} stats - 任务统计信息 */
@@ -151,16 +151,18 @@ export default class ManagerModel extends EventEmitter {
       for (let i = 0; i < count; i++) {
         if (this.sheet.alives.size < this.config.maxConcurrent) {
           let task = await this.pickup();
+
           (async () => {
             try {
               await task.wrapped_init();
               await task.wrapped_run();
             }
-            catch (err) { 
+            catch (err) {
               task.emit('err', err);
               task.emit('end');
             }
           })()
+
         }
       }
       await this.TaskFactoryClass.delay();
