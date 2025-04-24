@@ -1,17 +1,18 @@
-import { BaseTaskModel } from '../dist/models.js';
+import BaseTask from './base.js';
+
 
 /**
  * 休眠测试任务类，用于验证任务调度系统的并发处理能力
- * @extends BaseTaskModel
+ * @extends BaseTask
  */
-export default class SleepTask extends BaseTaskModel {
+export default class SleepTask extends BaseTask {
   /**
    * 任务配置信息
    * @static
    * @type {TaskConfig}
    */
   static config = {
-    ...BaseTaskModel.config,
+    ...super.config,
     name: 'sleep',
     description: '随机休眠测试任务',
     maxConcurrent: 5,      // 降低并发数方便观察效果
@@ -25,7 +26,7 @@ export default class SleepTask extends BaseTaskModel {
    * @async
    * @override
    */
-  async initialize() {
+  async init() {
     // 生成随机参数
     /** @member {number} duration - 实际休眠时长（毫秒） */
     this.duration = Math.floor(Math.random() * 15000 + 5000);
@@ -40,6 +41,7 @@ export default class SleepTask extends BaseTaskModel {
    * @emits SleepTask#progress
    */
   async run() {
+    
     // 分阶段休眠（每1秒触发进度事件）
     const steps = Math.floor(this.duration / 1000);
     for (let i = 1; i <= steps; i++) {

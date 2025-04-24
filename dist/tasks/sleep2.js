@@ -14,10 +14,11 @@ export default class SleepTask extends BaseTaskModel {
     ...BaseTaskModel.config,
     name: 'sleep',
     description: '随机休眠测试任务',
-    maxConcurrent: 5,      // 降低并发数方便观察效果
+    maxConcurrent: 5,
+    // 降低并发数方便观察效果
     maxResultCache: 200,
     breakTimeMaxAddendum: 500,
-    checkTime: 5000        // 缩短健康检查间隔
+    checkTime: 5000 // 缩短健康检查间隔
   };
 
   /**
@@ -50,8 +51,8 @@ export default class SleepTask extends BaseTaskModel {
        * @property {number} current 当前进度(秒)
        * @property {number} total 总时长(秒)
        */
-      this.emit('progress', { 
-        current: i, 
+      this.emit('progress', {
+        current: i,
         total: steps,
         elapsed: performance.now() - this.startTime
       });

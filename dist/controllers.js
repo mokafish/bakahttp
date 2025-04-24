@@ -1,5 +1,14 @@
-// core/controllers/TaskController.js
+/**
+ * @file TaskController.js
+ * @module TaskController
+ * @deprecated - This module is deprecated and will be removed in the future.
+ */
+
 import { TaskLoader } from '../services/TaskLoader.js';
+
+/**
+ * @deprecated - This class is deprecated and will be removed in the future.
+ */
 export class TaskController {
   constructor() {
     this.tasks = new Map();

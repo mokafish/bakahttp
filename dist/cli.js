@@ -4,10 +4,10 @@ import meow from 'meow';
 import React from 'react';
 import { render } from 'ink';
 import App from './view.js';
+import SleepTask from './tasks/sleep.js';
 // import pkg from '../package.json' with  { type: 'json' };
-
-import { loadTask } from './services.js';
-import { ManagerModel } from './models.js';
+// import { loadTask } from './services.js';
+import Baka from './baka.js';
 const pkg = JSON.parse(await fs.readFile(new URL('../package.json', import.meta.url), 'utf-8'));
 const cli = meow(`
   Usage
@@ -30,15 +30,17 @@ const cli = meow(`
     task: {
       type: 'string',
       shortFlag: 't',
-      default: 'sleep2'
+      default: 'sleep'
     }
   }
 });
 let taskName = cli.flags.task;
-let taskModule = await loadTask(taskName);
-let taskClass = taskModule.default;
-let bakaManager = new ManagerModel(taskClass, {});
-await bakaManager.initialize();
+// let taskModule = await loadTask(taskName);
+// let taskClass =  taskModule.default 
+let taskClass = SleepTask;
+let bk = new Baka(taskClass, {});
 render(/*#__PURE__*/React.createElement(App, {
-  baka: bakaManager
+  baka: bk
 }));
+await bk.init();
+bk.start();

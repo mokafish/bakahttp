@@ -1,4 +1,8 @@
-// process.cwd
+
+/**
+ * 
+ * @deprecated - This function is deprecated and will be removed in the future.
+ */
 export async function loadTask(name = 'sleep') {
   const attempts = [
       () => import(`./${name}.js`),
