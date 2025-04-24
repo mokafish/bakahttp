@@ -258,6 +258,8 @@ export class ManagerModel extends EventEmitter {
       ...TaskFactoryClass?.config,
       ...overConfig
     };
+    console.log(this.TaskFactoryClass);
+
     /** @member {boolean} running - 管理器运行状态 */
     this.running = false;
     /** @member {Object} sheet - 任务状态存储对象 */

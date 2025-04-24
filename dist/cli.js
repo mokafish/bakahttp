@@ -1,19 +1,20 @@
 #!/usr/bin/env node
+import fs from 'fs/promises';
 import meow from 'meow';
 import React from 'react';
 import { render } from 'ink';
 import App from './view.js';
-import pkg from '../package.json' with { type: 'json' };
+// import pkg from '../package.json' with  { type: 'json' };
+
 import { loadTask } from './services.js';
 import { ManagerModel } from './models.js';
-
-// meow报错 Error: The option `alias` has been renamed to `shortFlag`. The following flags need to be updated: `--concurrent`
+const pkg = JSON.parse(await fs.readFile(new URL('../package.json', import.meta.url), 'utf-8'));
 const cli = meow(`
   Usage
-    $ ${pkg.name} <command> [options]
+    $ ${pkg.name} [options] [args]
 
   Options
-    --concurrent, -c  设置最大并发数
+    --concurrent, -c <num> 设置最大并发数
     --help            显示帮助信息
 
   Examples
@@ -25,10 +26,15 @@ const cli = meow(`
       type: 'number',
       shortFlag: 'c',
       default: 16
+    },
+    task: {
+      type: 'string',
+      shortFlag: 't',
+      default: 'sleep2'
     }
   }
 });
-let taskName = cli.input[0] || 'sleep2';
+let taskName = cli.flags.task;
 let taskModule = await loadTask(taskName);
 let taskClass = taskModule.default;
 let bakaManager = new ManagerModel(taskClass, {});

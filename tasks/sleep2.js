@@ -1,10 +1,10 @@
-import { BaseTaskModel } from './models.js';
+import { BaseTaskModel } from '../dist/models.js';
 
 /**
  * 休眠测试任务类，用于验证任务调度系统的并发处理能力
  * @extends BaseTaskModel
  */
-export class SleepTask extends BaseTaskModel {
+export default class SleepTask extends BaseTaskModel {
   /**
    * 任务配置信息
    * @static
