@@ -151,17 +151,16 @@ export default class ManagerModel extends EventEmitter {
       for (let i = 0; i < count; i++) {
         if (this.sheet.alives.size < this.config.maxConcurrent) {
           let task = await this.pickup();
-          task.wrapped_init()
-            .then(() => {
-              task.wrapped_run().catch((err) => {
-                task.emit('err', err);
-                task.emit('end');
-              });
-            })
-            .catch((err) => {
+          (async () => {
+            try {
+              await task.wrapped_init();
+              await task.wrapped_run();
+            }
+            catch (err) { 
               task.emit('err', err);
               task.emit('end');
-            });
+            }
+          })()
         }
       }
       await this.TaskFactoryClass.delay();

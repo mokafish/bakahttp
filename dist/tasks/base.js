@@ -143,7 +143,7 @@ export default class BaseTask extends EventEmitter {
     } finally {
       this.end_time = Date.now();
       this.state = 'end';
-      this._updateUsedTime();
+      this.updateUsedTime();
       await this.cleanup();
     }
     this.emit('end');
