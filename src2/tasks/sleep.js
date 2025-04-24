@@ -18,7 +18,7 @@ export default class SleepTask extends BaseTask {
     name: 'sleep',
     description: '随机休眠测试任务',
     maxConcurrent: 12,      // 降低并发数方便观察效果
-    delayPlue: 500,
+    delayPlus: 500,
     checkDelay: 5000        // 缩短健康检查间隔
   };
 

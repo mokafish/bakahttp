@@ -82,8 +82,8 @@ export default class BaseTask extends EventEmitter {
         this.props = {};
         /** @member {number} tid - 唯一任务ID */
         this.tid = BaseTask.nextID();
-        /** @member {string} title - 任务标题，格式：'base task {tid}' */
-        this.title = `base task ${this.tid}`;
+        /** @member {string} title - 任务标题 */
+        this.title = `${this.constructor.config.name} ${this.tid}`;
         /** @member {string} note - 任务备注信息 */
         this.note = '-';
         /** @member {number} start_time - 任务开始时间戳（毫秒） */

@@ -10,7 +10,7 @@ import BaseTask from './tasks/base.js';
  * @returns 
  */
 export default function App({ baka }) {
-  const [state, setState] = useReducer((prev, next) => ({ ...prev, ...next }), {
+  const [state, setState] = useReducer((prev, next) => ({ ...prev, ...(typeof next == 'function' ? next() : next) }), {
     // TODO: add more state variables as needed
     config: baka.config,
     stats: {
@@ -20,7 +20,7 @@ export default function App({ baka }) {
       fail: 0,
       err: 0,
     },
-    alives: [],
+    alives: [[], [], 0],
     results: [],
     errors: [],
     echoBuffer: [],
@@ -35,11 +35,18 @@ export default function App({ baka }) {
     baka.on('pickup', (/** @type {BaseTask} */ task) => {
       setState({
         stats: { ...baka.stats },
+        alives: mySlice(baka.sheet.alives, 5),
       });
       baka.emit('echo', `Task ${task.title} started. ${echoQueue.current.size()}`);
     });
     baka.on('popup', (/** @type {BaseTask} */ task) => {
-      baka.emit('echo', `Task ${task.title} finished.`);
+      setState({
+        stats: { ...baka.stats },
+        alives: mySlice(baka.sheet.alives, 5),
+        results: getQueTail(baka.sheet.results, 10),
+        errors: getQueTail(baka.sheet.errors, 5),
+      });
+      baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
 
     });
     baka.on('progress', (/** @type {BaseTask} */ task) => {
@@ -55,29 +62,74 @@ export default function App({ baka }) {
   }, [baka]);
   return (
     <Box height="auto" flexDirection="column">
-      {Object.keys(state.config).map((key) =>
-        <Text key={key}>
-          <Text color="blue"> {key}:</Text>
-          <Text color="yellow"> {state.config[key]}</Text>
-        </Text>
-      )}
-      <Text color="gray">----------------------------------</Text>
+      <Text>
+        {state.config.name} -{state.config.maxConcurrent}{' '}
+        {state.config.delay}+{state.config.delayPlus}ms{' '}
+        {state.config.pickupCount}+{state.config.pickupCountPlus}u
+      </Text>
       <EchoView texts={state.echoBuffer} />
-      <Text color="gray">----------------------------------</Text>
+      {/* ---------------- */}
+
+      <Box height={5} flexDirection="column" >
+        {state.alives[0].map((v, i) => <Text key={i}>
+          <Text color="magentaBright">* {v.title}</Text>
+        </Text>)}
+        {state.alives[2] != 0 && <Text>
+          <Text color="magenta">...{state.alives[2]} items hidden</Text>
+        </Text>}
+        {state.alives[1].map((v, i) => <Text key={i}>
+          <Text color="magentaBright">* {v.title}</Text>
+        </Text>)}
+
+      </Box>
+      {/* ---------------- */}
+      {/* <Box flexDirection="column" height={5}>
+        {state.errors.map((item, index) => (
+          <Text key={index} color="whiteBright">
+            <Text color="red">o </Text>
+            {item?.title}
+          </Text>
+        ))}
+      </Box> */}
+
+      {/* ---------------- */}
+      <Box flexDirection="column" height={10}>
+
+        {state.results.map((item, index) => (
+          <Text key={index} color="blueBright">
+            <Text color="blue">o </Text>
+            {item?.title}
+          </Text>
+        ))}
+      </Box>
+      {/* ---------------- */}
       <StatsView {...state.stats} />
     </Box>
 
   );
 }
 
+// function listView({ items, color = 'white' }) {
+//   return (
+//     <Box flexDirection="column">
+//       {items.map((item, index) => (
+//         <Text key={index} color={color}>{item}</Text>
+//       ))}
+//     </Box>
+//   );
+// }
+
+
 function StatsView({ total, alive, ok, fail, err }) {
   return (
     <Box flexDirection="column">
-      <Text>Total: {total}</Text>
-      <Text>Alive: {alive}</Text>
-      <Text>OK: {ok}</Text>
-      <Text>Fail: {fail}</Text>
-      <Text>Err: {err}</Text>
+      <Text>
+        Total: {total}{'  '}
+        Alive: {alive}{'  '}
+        OK: {ok}{'  '}
+        Fail: {fail}{'  '}
+        Err: {err}{' '}
+      </Text>
     </Box>
   );
 }
@@ -85,7 +137,7 @@ function StatsView({ total, alive, ok, fail, err }) {
 
 function EchoView({ texts }) {
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" height={5}>
       {texts.map((text, index) => (
         <Text key={index} color="gray">{text}</Text>
       ))}
@@ -110,6 +162,21 @@ function mySlice(arr, n) {
   return [a.slice(0, l), a.slice(r), a.length - n];
 }
 
+/**
+ * 
+ * @param {Denque} q 
+ * @param {Number} n 
+ * @returns {Array} - 返回一个包含最后 n 个元素的数组
+ */
+function getQueTail(q, n) {
+
+  n = Math.min(q.length, n);
+  let a = new Array(n);
+  for (let i = 0; i < n; i++) {
+    a[i] = q.peekAt(q.length - n + i);
+  }
+  return a
+}
 
 
 const timeFormatter = new Intl.DateTimeFormat('en-GB', {

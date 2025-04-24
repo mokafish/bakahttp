@@ -14,7 +14,7 @@ export default function App({
 }) {
   const [state, setState] = useReducer((prev, next) => ({
     ...prev,
-    ...next
+    ...(typeof next == 'function' ? next() : next)
   }), {
     // TODO: add more state variables as needed
     config: baka.config,
@@ -25,7 +25,7 @@ export default function App({
       fail: 0,
       err: 0
     },
-    alives: [],
+    alives: [[], [], 0],
     results: [],
     errors: [],
     echoBuffer: []
@@ -43,12 +43,21 @@ export default function App({
       setState({
         stats: {
           ...baka.stats
-        }
+        },
+        alives: mySlice(baka.sheet.alives, 5)
       });
       baka.emit('echo', `Task ${task.title} started. ${echoQueue.current.size()}`);
     });
     baka.on('popup', (/** @type {BaseTask} */task) => {
-      baka.emit('echo', `Task ${task.title} finished.`);
+      setState({
+        stats: {
+          ...baka.stats
+        },
+        alives: mySlice(baka.sheet.alives, 5),
+        results: getQueTail(baka.sheet.results, 10),
+        errors: getQueTail(baka.sheet.errors, 5)
+      });
+      baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
     });
     baka.on('progress', (/** @type {BaseTask} */task) => {
       // TODO: handle progress event
@@ -63,20 +72,42 @@ export default function App({
   return /*#__PURE__*/React.createElement(Box, {
     height: "auto",
     flexDirection: "column"
-  }, Object.keys(state.config).map(key => /*#__PURE__*/React.createElement(Text, {
-    key: key
+  }, /*#__PURE__*/React.createElement(Text, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(EchoView, {
+    texts: state.echoBuffer
+  }), /*#__PURE__*/React.createElement(Box, {
+    height: 5,
+    flexDirection: "column"
+  }, state.alives[0].map((v, i) => /*#__PURE__*/React.createElement(Text, {
+    key: i
+  }, /*#__PURE__*/React.createElement(Text, {
+    color: "magentaBright"
+  }, "* ", v.title))), state.alives[2] != 0 && /*#__PURE__*/React.createElement(Text, null, /*#__PURE__*/React.createElement(Text, {
+    color: "magenta"
+  }, "...", state.alives[2], " items hidden")), state.alives[1].map((v, i) => /*#__PURE__*/React.createElement(Text, {
+    key: i
+  }, /*#__PURE__*/React.createElement(Text, {
+    color: "magentaBright"
+  }, "* ", v.title)))), /*#__PURE__*/React.createElement(Box, {
+    flexDirection: "column",
+    height: 10
+  }, state.results.map((item, index) => /*#__PURE__*/React.createElement(Text, {
+    key: index,
+    color: "blueBright"
   }, /*#__PURE__*/React.createElement(Text, {
     color: "blue"
-  }, " ", key, ":"), /*#__PURE__*/React.createElement(Text, {
-    color: "yellow"
-  }, " ", state.config[key]))), /*#__PURE__*/React.createElement(Text, {
-    color: "gray"
-  }, "----------------------------------"), /*#__PURE__*/React.createElement(EchoView, {
-    texts: state.echoBuffer
-  }), /*#__PURE__*/React.createElement(Text, {
-    color: "gray"
-  }, "----------------------------------"), /*#__PURE__*/React.createElement(StatsView, state.stats));
+  }, "o "), item?.title))), /*#__PURE__*/React.createElement(StatsView, state.stats));
 }
+
+// function listView({ items, color = 'white' }) {
+//   return (
+//     <Box flexDirection="column">
+//       {items.map((item, index) => (
+//         <Text key={index} color={color}>{item}</Text>
+//       ))}
+//     </Box>
+//   );
+// }
+
 function StatsView({
   total,
   alive,
@@ -86,13 +117,14 @@ function StatsView({
 }) {
   return /*#__PURE__*/React.createElement(Box, {
     flexDirection: "column"
-  }, /*#__PURE__*/React.createElement(Text, null, "Total: ", total), /*#__PURE__*/React.createElement(Text, null, "Alive: ", alive), /*#__PURE__*/React.createElement(Text, null, "OK: ", ok), /*#__PURE__*/React.createElement(Text, null, "Fail: ", fail), /*#__PURE__*/React.createElement(Text, null, "Err: ", err));
+  }, /*#__PURE__*/React.createElement(Text, null, "Total: ", total, '  ', "Alive: ", alive, '  ', "OK: ", ok, '  ', "Fail: ", fail, '  ', "Err: ", err, ' '));
 }
 function EchoView({
   texts
 }) {
   return /*#__PURE__*/React.createElement(Box, {
-    flexDirection: "column"
+    flexDirection: "column",
+    height: 5
   }, texts.map((text, index) => /*#__PURE__*/React.createElement(Text, {
     key: index,
     color: "gray"
@@ -113,6 +145,21 @@ function mySlice(arr, n) {
   const l = Math.floor(--n / 2);
   const r = -(l + n % 2);
   return [a.slice(0, l), a.slice(r), a.length - n];
+}
+
+/**
+ * 
+ * @param {Denque} q 
+ * @param {Number} n 
+ * @returns {Array} - 返回一个包含最后 n 个元素的数组
+ */
+function getQueTail(q, n) {
+  n = Math.min(q.length, n);
+  let a = new Array(n);
+  for (let i = 0; i < n; i++) {
+    a[i] = q.peekAt(q.length - n + i);
+  }
+  return a;
 }
 const timeFormatter = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
