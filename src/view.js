@@ -89,8 +89,15 @@ export default function App({ baka }) {
       setState({
         perf: readablePerf(baka.perf),
       })
-      baka.emit('echo', `tick`);
-    })
+      // baka.emit('echo', `tick`);
+    });
+
+    baka.on('catch', (err, task) => {
+      baka.emit('echo', `catch ${err.name}`);
+    });
+    baka.on('check', (health) => {
+      baka.emit('echo', `check health: ${health}`);
+    });
 
   }, [baka]);
   return (
@@ -195,7 +202,7 @@ function PerfView({ cpu, mem, rx, tx, sp }) {
       </MemoBox>
       <MemoBox flexDirection="column" width={15} height={2}> 
         <MemoText>
-          PS: N/A
+          PS: N/A {/* package speed  */}
         </MemoText>
         <MemoText>
           BS: {sp}

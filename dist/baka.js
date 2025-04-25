@@ -124,19 +124,20 @@ export default class ManagerModel extends EventEmitter {
     this.sheet.alives.add(task);
     this.stats.total++;
     this.stats.alive = this.sheet.alives.size;
-    task.on('ok', () => {
+    task.once('ok', () => {
       this.stats.ok++;
       this.sheet.results.push(task);
     });
-    task.on('fail', err => {
+    task.once('fail', err => {
       this.stats.fail++;
       this.sheet.results.push(err);
     });
-    task.on('err', err => {
+    task.once('err', err => {
       this.stats.err++;
       this.sheet.errors.push(err);
+      this.emit('catch', err, task);
     });
-    task.on('end', () => {
+    task.once('end', () => {
       this.sheet.alives.delete(task);
       this.stats.alive = this.sheet.alives.size;
       this.emit('popup', task);
@@ -163,7 +164,7 @@ export default class ManagerModel extends EventEmitter {
       const health = await this.TaskFactoryClass.check([...this.sheet.alives], this.sheet.results.toArray(), this.sheet.errors.toArray(), this.healthHistory.toArray());
       this.healthHistory.push(health);
       this.emit('check', health);
-    }, this.config.check);
+    }, this.config.checkDelay);
     this.emit('start');
 
     // 任务接取循环
@@ -194,7 +195,7 @@ export default class ManagerModel extends EventEmitter {
       this.emit('tick');
       // this.emit('echo', 'tick end');
     } catch (err) {
-      this.emit('echo', err + '');
+      this.emit('echo', `tick: throw ${err?.name}`);
     }
   }
 

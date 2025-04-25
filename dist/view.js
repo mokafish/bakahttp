@@ -96,7 +96,13 @@ export default function App({
       setState({
         perf: readablePerf(baka.perf)
       });
-      baka.emit('echo', `tick`);
+      // baka.emit('echo', `tick`);
+    });
+    baka.on('catch', (err, task) => {
+      baka.emit('echo', `catch ${err.name}`);
+    });
+    baka.on('check', health => {
+      baka.emit('echo', `check health: ${health}`);
     });
   }, [baka]);
   return /*#__PURE__*/React.createElement(MemoBox, {
@@ -176,7 +182,7 @@ function PerfView({
     flexDirection: "column",
     width: 15,
     height: 2
-  }, /*#__PURE__*/React.createElement(MemoText, null, "PS: N/A"), /*#__PURE__*/React.createElement(MemoText, null, "BS: ", sp)));
+  }, /*#__PURE__*/React.createElement(MemoText, null, "PS: N/A "), /*#__PURE__*/React.createElement(MemoText, null, "BS: ", sp)));
 }
 function EchoView({
   texts,

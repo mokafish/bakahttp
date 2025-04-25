@@ -126,19 +126,20 @@ export default class ManagerModel extends EventEmitter {
     this.sheet.alives.add(task);
     this.stats.total++;
     this.stats.alive = this.sheet.alives.size;
-    task.on('ok', () => {
+    task.once('ok', () => {
       this.stats.ok++;
       this.sheet.results.push(task);
     });
-    task.on('fail', (err) => {
+    task.once('fail', (err) => {
       this.stats.fail++;
       this.sheet.results.push(err);
     });
-    task.on('err', (err) => {
+    task.once('err', (err) => {
       this.stats.err++;
       this.sheet.errors.push(err);
+      this.emit('catch', err, task)
     });
-    task.on('end', () => {
+    task.once('end', () => {
       this.sheet.alives.delete(task);
       this.stats.alive = this.sheet.alives.size;
       this.emit('popup', task);
@@ -157,10 +158,10 @@ export default class ManagerModel extends EventEmitter {
     if (this.running) return;
     this.running = true;
 
-    this.clock_timer = setInterval(async () =>{
+    this.clock_timer = setInterval(async () => {
       this.tick();
     }, 1000);
-    
+
     // 健康检查定时器
     this.healthCheckTimer = setInterval(async () => {
       // PERFORMANCE: 这里可以考虑不转换数据结构，直接传递引用
@@ -172,7 +173,7 @@ export default class ManagerModel extends EventEmitter {
       );
       this.healthHistory.push(health);
       this.emit('check', health);
-    }, this.config.check);
+    }, this.config.checkDelay);
 
     this.emit('start');
 
@@ -212,7 +213,7 @@ export default class ManagerModel extends EventEmitter {
 
     }
     catch (err) {
-      this.emit('echo', err + '');
+      this.emit('echo', `tick: throw ${err?.name}`);
     }
   }
 
