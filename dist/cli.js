@@ -38,6 +38,7 @@ let taskName = cli.flags.task;
 // let taskModule = await loadTask(taskName);
 // let taskClass =  taskModule.default 
 let taskClass = SleepTask;
+await taskClass.parseArgs(cli.input);
 let bk = new Baka(taskClass, {});
 render(/*#__PURE__*/React.createElement(App, {
   baka: bk
