@@ -161,7 +161,27 @@ function StatsView({
 }) {
   return /*#__PURE__*/React.createElement(MemoBox, {
     flexDirection: "column"
-  }, /*#__PURE__*/React.createElement(MemoText, null, "Total: ", total, '  ', "Alive: ", alive, '  ', "OK: ", ok, '  ', "Fail: ", fail, '  ', "Err: ", err, ' '));
+  }, /*#__PURE__*/React.createElement(MemoText, null, /*#__PURE__*/React.createElement(MemoText, {
+    color: "cyan"
+  }, /*#__PURE__*/React.createElement(MemoText, {
+    color: "cyanBright"
+  }, "sum "), total), /*#__PURE__*/React.createElement(MemoText, {
+    color: "magenta"
+  }, /*#__PURE__*/React.createElement(MemoText, {
+    color: "magentaBright"
+  }, "  ~ "), alive), /*#__PURE__*/React.createElement(MemoText, {
+    color: "blue"
+  }, /*#__PURE__*/React.createElement(MemoText, {
+    color: "blueBright"
+  }, "  o "), ok), /*#__PURE__*/React.createElement(MemoText, {
+    color: "yellow"
+  }, /*#__PURE__*/React.createElement(MemoText, {
+    color: "yellowBright"
+  }, "  x "), fail), /*#__PURE__*/React.createElement(MemoText, {
+    color: "red"
+  }, /*#__PURE__*/React.createElement(MemoText, {
+    color: "redBright"
+  }, "  e "), err)));
 }
 function PerfView({
   cpu,
@@ -174,15 +194,27 @@ function PerfView({
     flexDirection: "column",
     width: 15,
     height: 2
-  }, /*#__PURE__*/React.createElement(MemoText, null, "CPU: ", cpu), /*#__PURE__*/React.createElement(MemoText, null, "MEM: ", mem)), /*#__PURE__*/React.createElement(MemoBox, {
+  }, /*#__PURE__*/React.createElement(MemoText, null, "CPU ", /*#__PURE__*/React.createElement(MemoText, {
+    color: "gray"
+  }, cpu)), /*#__PURE__*/React.createElement(MemoText, null, "Mem ", /*#__PURE__*/React.createElement(MemoText, {
+    color: "gray"
+  }, mem))), /*#__PURE__*/React.createElement(MemoBox, {
     flexDirection: "column",
     width: 15,
     height: 2
-  }, /*#__PURE__*/React.createElement(MemoText, null, "TX: ", tx), /*#__PURE__*/React.createElement(MemoText, null, "RX: ", rx)), /*#__PURE__*/React.createElement(MemoBox, {
+  }, /*#__PURE__*/React.createElement(MemoText, null, "Tx ", /*#__PURE__*/React.createElement(MemoText, {
+    color: "gray"
+  }, tx)), /*#__PURE__*/React.createElement(MemoText, null, "Rx ", /*#__PURE__*/React.createElement(MemoText, {
+    color: "gray"
+  }, rx))), /*#__PURE__*/React.createElement(MemoBox, {
     flexDirection: "column",
     width: 15,
     height: 2
-  }, /*#__PURE__*/React.createElement(MemoText, null, "PS: N/A "), /*#__PURE__*/React.createElement(MemoText, null, "BS: ", sp)));
+  }, /*#__PURE__*/React.createElement(MemoText, null, "Ps ", /*#__PURE__*/React.createElement(MemoText, {
+    color: "gray"
+  }, "N/A"), " "), /*#__PURE__*/React.createElement(MemoText, null, "Bs ", /*#__PURE__*/React.createElement(MemoText, {
+    color: "gray"
+  }, sp))));
 }
 function EchoView({
   texts,

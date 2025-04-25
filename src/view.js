@@ -129,7 +129,6 @@ export default function App({ baka }) {
 
       {/* results ---------------- */}
       <MemoBox flexDirection="column" height={10}>
-
         {state.results.map((/** @type {BaseTask} */ item, index) => (
           <MemoText key={index} color="blueBright">
             <MemoText color="blue">[{formatTime(item.end_time)}] </MemoText>
@@ -171,11 +170,26 @@ function StatsView({ total, alive, ok, fail, err }) {
   return (
     <MemoBox flexDirection="column">
       <MemoText>
-        Total: {total}{'  '}
-        Alive: {alive}{'  '}
-        OK: {ok}{'  '}
-        Fail: {fail}{'  '}
-        Err: {err}{' '}
+        <MemoText color="cyan">
+          <MemoText color="cyanBright">sum </MemoText>
+          {total}
+        </MemoText>
+        <MemoText color="magenta">
+          <MemoText color="magentaBright">  ~ </MemoText>
+          {alive}
+        </MemoText>
+        <MemoText color="blue">
+          <MemoText color="blueBright">  o </MemoText>
+          {ok}
+        </MemoText>
+        <MemoText color="yellow">
+          <MemoText color="yellowBright">  x </MemoText>
+          {fail}
+        </MemoText>
+        <MemoText color="red">
+          <MemoText color="redBright">  e </MemoText>
+          {err}
+        </MemoText>
       </MemoText>
     </MemoBox>
   );
@@ -186,26 +200,26 @@ function PerfView({ cpu, mem, rx, tx, sp }) {
     <MemoBox>
       <MemoBox flexDirection="column" width={15} height={2}>
         <MemoText>
-          CPU: {cpu}
+          CPU <MemoText color="gray">{cpu}</MemoText>
         </MemoText>
         <MemoText>
-          MEM: {mem}
-        </MemoText>
-      </MemoBox>
-      <MemoBox flexDirection="column" width={15} height={2}>
-        <MemoText>
-          TX: {tx}
-        </MemoText>
-        <MemoText>
-          RX: {rx}
+          Mem <MemoText color="gray">{mem}</MemoText>
         </MemoText>
       </MemoBox>
       <MemoBox flexDirection="column" width={15} height={2}>
         <MemoText>
-          PS: N/A {/* package speed  */}
+          Tx <MemoText color="gray">{tx}</MemoText>
         </MemoText>
         <MemoText>
-          BS: {sp}
+          Rx <MemoText color="gray">{rx}</MemoText>
+        </MemoText>
+      </MemoBox>
+      <MemoBox flexDirection="column" width={15} height={2}>
+        <MemoText>
+          Ps <MemoText color="gray">N/A</MemoText> {/* package speed  */}
+        </MemoText>
+        <MemoText>
+          Bs <MemoText color="gray">{sp}</MemoText>
         </MemoText>
       </MemoBox>
     </MemoBox>
