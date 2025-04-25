@@ -6,7 +6,7 @@ import BaseTask from './tasks/base.js';
 
 
 const MemoBox = React.memo(Box);
-const MemoText = React.memo(Text); 
+const MemoText = React.memo(Text);
 
 /**
  * 
@@ -30,72 +30,70 @@ export default function App({ baka }) {
   });
 
   const echoQueue = useRef(new Denque([], { capacity: 5 }));
-  const clockTimer = useRef(null);
+  const refreshTimer = useRef(null);
   useEffect(() => {
-    clockTimer.current = setInterval(() => {
+    // Interval refresh mode
+    // refreshTimer.current = setInterval(() => {
+    //   setState({
+    //     config: baka.config,
+    //     stats:  baka.stats,
+    //     alives: mySlice(baka.sheet.alives, 5),
+    //     results: getQueTail(baka.sheet.results, 10),
+    //     errors: getQueTail(baka.sheet.errors, 5),
+    //     echoBuffer: echoQueue.current.toArray()
+    //   });
+    // }, 1000);
+
+    // quickly refresh mode
+    baka.on('echo', (/** @type {String} */ msg) => {
+      echoQueue.current.push(`[${formatTime()}] ${msg}`);
       setState({
-        config: baka.config,
-        stats:  baka.stats,
+        echoBuffer: echoQueue.current.toArray()
+      });
+    });
+
+    baka.on('init', () => {
+      setState({ config: baka.config });
+    });
+    baka.on('pickup', (/** @type {BaseTask} */ task) => {
+      setState({
+        stats: { ...baka.stats },
+        alives: mySlice(baka.sheet.alives, 5),
+      });
+      baka.emit('echo', `pickup ${task.title}`);
+    });
+    baka.on('popup', (/** @type {BaseTask} */ task) => {
+      setState({
+        stats: { ...baka.stats },
         alives: mySlice(baka.sheet.alives, 5),
         results: getQueTail(baka.sheet.results, 10),
         errors: getQueTail(baka.sheet.errors, 5),
-        echoBuffer: echoQueue.current.toArray()
       });
-    }, 1000);
-    baka.on('init', () => {
-      // setState({ config: baka.config });
-    });
-    baka.on('pickup', (/** @type {BaseTask} */ task) => {
-      // setState({
-      //   stats: { ...baka.stats },
-      //   alives: mySlice(baka.sheet.alives, 5),
-      // });
-      baka.emit('echo', `Task ${task.title} started. ${echoQueue.current.size()}`);
-    });
-    baka.on('popup', (/** @type {BaseTask} */ task) => {
-      // setState({
-      //   stats: { ...baka.stats },
-      //   alives: mySlice(baka.sheet.alives, 5),
-      //   results: getQueTail(baka.sheet.results, 10),
-      //   errors: getQueTail(baka.sheet.errors, 5),
-      // });
-      baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
+      // baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
 
     });
     baka.on('progress', (/** @type {BaseTask} */ task) => {
       // TODO: handle progress event
     });
 
-    baka.on('echo', (/** @type {String} */ msg) => {
-      echoQueue.current.push(`[${formatTime()}] ${msg}`);
-      // setState({
-      //   echoBuffer: echoQueue.current.toArray()
-      // });
-    })
+
   }, [baka]);
   return (
-    <MemoBox height="auto" flexDirection="column">
-      <MemoText>
-        {state.config.name} -{state.config.maxConcurrent}{' '}
-        {state.config.delay}+{state.config.delayPlus}ms{' '}
-        {state.config.pickupCount}+{state.config.pickupCountPlus}u
-      </MemoText>
-      <EchoView texts={state.echoBuffer} />
-      {/* ---------------- */}
-
-      <MemoBox height={5} flexDirection="column" >
-        {state.alives[0].map((v, i) => <MemoText key={i}>
-          <MemoText color="magentaBright">* {v.title}</MemoText>
-        </MemoText>)}
-        {state.alives[2] != 0 && <MemoText>
-          <MemoText color="magenta">...{state.alives[2]} items hidden</MemoText>
-        </MemoText>}
-        {state.alives[1].map((v, i) => <MemoText key={i}>
-          <MemoText color="magentaBright">* {v.title}</MemoText>
-        </MemoText>)}
-
+    <MemoBox height={24} flexDirection="column">
+      {/* config and stats ---------------- */}
+      <MemoBox height={4} flexDirection="column">
+        <MemoText>
+          {state.config.name} -{state.config.maxConcurrent}{' '}
+          {state.config.delay}+{state.config.delayPlus}ms{' '}
+          {state.config.pickupCount}+{state.config.pickupCountPlus}u
+        </MemoText>
+        <StatsView {...state.stats} />
       </MemoBox>
-      {/* ---------------- */}
+
+      {/* echo messages ---------------- */}
+      <EchoView texts={state.echoBuffer} height={5} />
+
+      {/* errors messages ---------------- */}
       {/* <MemoBox flexDirection="column" height={5}>
         {state.errors.map((item, index) => (
           <MemoText key={index} color="whiteBright">
@@ -105,20 +103,32 @@ export default function App({ baka }) {
         ))}
       </MemoBox> */}
 
-      {/* ---------------- */}
+      {/* results ---------------- */}
       <MemoBox flexDirection="column" height={10}>
 
-        {state.results.map((item, index) => (
+        {state.results.map((/** @type {BaseTask} */ item, index) => (
           <MemoText key={index} color="blueBright">
-            <MemoText color="blue">o </MemoText>
-            {item?.title}
+            <MemoText color="blue">[{formatTime(item.end_time)}] </MemoText>
+            {item.title}
           </MemoText>
         ))}
       </MemoBox>
-      {/* ---------------- */}
-      <StatsView {...state.stats} />
-    </MemoBox>
 
+      {/* alives ---------------- */}
+      <MemoBox height={5} flexDirection="column" >
+        {state.alives[0].map((/** @type {BaseTask} */ v, i) => <MemoText key={i}>
+            <MemoText color="magenta">[{formatTime(v.start_time)}] </MemoText>
+            <MemoText color="magentaBright">{v.title}</MemoText>
+        </MemoText>)}
+        {state.alives[2] != 0 && <MemoText>
+          <MemoText color="magenta">{'  ...'}{state.alives[2]} alive task items hidden</MemoText>
+        </MemoText>}
+        {state.alives[1].map((/** @type {BaseTask} */ v, i) => <MemoText key={i}>
+            <MemoText color="magenta">[{formatTime(v.start_time)}] </MemoText>
+            <MemoText color="magentaBright">{v.title}</MemoText>
+        </MemoText>)}
+      </MemoBox>
+    </MemoBox>
   );
 }
 
@@ -148,9 +158,9 @@ function StatsView({ total, alive, ok, fail, err }) {
 }
 
 
-function EchoView({ texts }) {
+function EchoView({ texts, height = 5, ...props }) {
   return (
-    <MemoBox flexDirection="column" height={5}>
+    <MemoBox flexDirection="column" height={height} {...props}>
       {texts.map((text, index) => (
         <MemoText key={index} color="gray">{text}</MemoText>
       ))}

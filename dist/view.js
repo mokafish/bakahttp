@@ -1,3 +1,4 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import React, { useReducer, useEffect, useRef } from 'react';
 import { Box, Text } from 'ink';
 import Baka from './baka.js';
@@ -34,74 +35,91 @@ export default function App({
   const echoQueue = useRef(new Denque([], {
     capacity: 5
   }));
-  const clockTimer = useRef(null);
+  const refreshTimer = useRef(null);
   useEffect(() => {
-    clockTimer.current = setInterval(() => {
+    // Interval refresh mode
+    // refreshTimer.current = setInterval(() => {
+    //   setState({
+    //     config: baka.config,
+    //     stats:  baka.stats,
+    //     alives: mySlice(baka.sheet.alives, 5),
+    //     results: getQueTail(baka.sheet.results, 10),
+    //     errors: getQueTail(baka.sheet.errors, 5),
+    //     echoBuffer: echoQueue.current.toArray()
+    //   });
+    // }, 1000);
+
+    // quickly refresh mode
+    baka.on('echo', (/** @type {String} */msg) => {
+      echoQueue.current.push(`[${formatTime()}] ${msg}`);
       setState({
-        config: baka.config,
-        stats: baka.stats,
-        alives: mySlice(baka.sheet.alives, 5),
-        results: getQueTail(baka.sheet.results, 10),
-        errors: getQueTail(baka.sheet.errors, 5),
         echoBuffer: echoQueue.current.toArray()
       });
-    }, 1000);
+    });
     baka.on('init', () => {
-      // setState({ config: baka.config });
+      setState({
+        config: baka.config
+      });
     });
     baka.on('pickup', (/** @type {BaseTask} */task) => {
-      // setState({
-      //   stats: { ...baka.stats },
-      //   alives: mySlice(baka.sheet.alives, 5),
-      // });
-      baka.emit('echo', `Task ${task.title} started. ${echoQueue.current.size()}`);
+      setState({
+        stats: {
+          ...baka.stats
+        },
+        alives: mySlice(baka.sheet.alives, 5)
+      });
+      baka.emit('echo', `pickup ${task.title}`);
     });
     baka.on('popup', (/** @type {BaseTask} */task) => {
-      // setState({
-      //   stats: { ...baka.stats },
-      //   alives: mySlice(baka.sheet.alives, 5),
-      //   results: getQueTail(baka.sheet.results, 10),
-      //   errors: getQueTail(baka.sheet.errors, 5),
-      // });
-      baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
+      setState({
+        stats: {
+          ...baka.stats
+        },
+        alives: mySlice(baka.sheet.alives, 5),
+        results: getQueTail(baka.sheet.results, 10),
+        errors: getQueTail(baka.sheet.errors, 5)
+      });
+      // baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
     });
     baka.on('progress', (/** @type {BaseTask} */task) => {
       // TODO: handle progress event
     });
-    baka.on('echo', (/** @type {String} */msg) => {
-      echoQueue.current.push(`[${formatTime()}] ${msg}`);
-      // setState({
-      //   echoBuffer: echoQueue.current.toArray()
-      // });
-    });
   }, [baka]);
   return /*#__PURE__*/React.createElement(MemoBox, {
-    height: "auto",
+    height: 24,
     flexDirection: "column"
-  }, /*#__PURE__*/React.createElement(MemoText, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(EchoView, {
-    texts: state.echoBuffer
+  }, /*#__PURE__*/React.createElement(MemoBox, {
+    height: 4,
+    flexDirection: "column"
+  }, /*#__PURE__*/React.createElement(MemoText, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(StatsView, state.stats)), /*#__PURE__*/React.createElement(EchoView, {
+    texts: state.echoBuffer,
+    height: 5
   }), /*#__PURE__*/React.createElement(MemoBox, {
-    height: 5,
-    flexDirection: "column"
-  }, state.alives[0].map((v, i) => /*#__PURE__*/React.createElement(MemoText, {
-    key: i
-  }, /*#__PURE__*/React.createElement(MemoText, {
-    color: "magentaBright"
-  }, "* ", v.title))), state.alives[2] != 0 && /*#__PURE__*/React.createElement(MemoText, null, /*#__PURE__*/React.createElement(MemoText, {
-    color: "magenta"
-  }, "...", state.alives[2], " items hidden")), state.alives[1].map((v, i) => /*#__PURE__*/React.createElement(MemoText, {
-    key: i
-  }, /*#__PURE__*/React.createElement(MemoText, {
-    color: "magentaBright"
-  }, "* ", v.title)))), /*#__PURE__*/React.createElement(MemoBox, {
     flexDirection: "column",
     height: 10
-  }, state.results.map((item, index) => /*#__PURE__*/React.createElement(MemoText, {
+  }, state.results.map((/** @type {BaseTask} */item, index) => /*#__PURE__*/React.createElement(MemoText, {
     key: index,
     color: "blueBright"
   }, /*#__PURE__*/React.createElement(MemoText, {
     color: "blue"
-  }, "o "), item?.title))), /*#__PURE__*/React.createElement(StatsView, state.stats));
+  }, "[", formatTime(item.end_time), "] "), item.title))), /*#__PURE__*/React.createElement(MemoBox, {
+    height: 5,
+    flexDirection: "column"
+  }, state.alives[0].map((/** @type {BaseTask} */v, i) => /*#__PURE__*/React.createElement(MemoText, {
+    key: i
+  }, /*#__PURE__*/React.createElement(MemoText, {
+    color: "magenta"
+  }, "[", formatTime(v.start_time), "] "), /*#__PURE__*/React.createElement(MemoText, {
+    color: "magentaBright"
+  }, v.title))), state.alives[2] != 0 && /*#__PURE__*/React.createElement(MemoText, null, /*#__PURE__*/React.createElement(MemoText, {
+    color: "magenta"
+  }, '  ...', state.alives[2], " alive task items hidden")), state.alives[1].map((/** @type {BaseTask} */v, i) => /*#__PURE__*/React.createElement(MemoText, {
+    key: i
+  }, /*#__PURE__*/React.createElement(MemoText, {
+    color: "magenta"
+  }, "[", formatTime(v.start_time), "] "), /*#__PURE__*/React.createElement(MemoText, {
+    color: "magentaBright"
+  }, v.title)))));
 }
 
 // function listView({ items, color = 'white' }) {
@@ -126,12 +144,14 @@ function StatsView({
   }, /*#__PURE__*/React.createElement(MemoText, null, "Total: ", total, '  ', "Alive: ", alive, '  ', "OK: ", ok, '  ', "Fail: ", fail, '  ', "Err: ", err, ' '));
 }
 function EchoView({
-  texts
+  texts,
+  height = 5,
+  ...props
 }) {
-  return /*#__PURE__*/React.createElement(MemoBox, {
+  return /*#__PURE__*/React.createElement(MemoBox, _extends({
     flexDirection: "column",
-    height: 5
-  }, texts.map((text, index) => /*#__PURE__*/React.createElement(MemoText, {
+    height: height
+  }, props), texts.map((text, index) => /*#__PURE__*/React.createElement(MemoText, {
     key: index,
     color: "gray"
   }, text)));
