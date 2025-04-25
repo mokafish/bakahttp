@@ -15,6 +15,8 @@ export async function perfStats() {
 
 let g_last_rx = 0;
 let g_last_tx = 0;
+let g_init_rx = 0;
+let g_init_tx = 0;
 async function getNetworkStats(last_rx, last_tx) {
     if (last_rx === undefined || last_tx === undefined) {
         last_rx = g_last_rx;
@@ -36,11 +38,18 @@ async function getNetworkStats(last_rx, last_tx) {
             if (parts.length < 10) continue; // 跳过不完整的行
             const iface = parts[0].replace(':', '');
             if (iface === 'lo') continue; // 跳过回环接口
-            const rx = parseInt(parts[1]);
-            const tx = parseInt(parts[9]);
+            const rx = parseInt(parts[1]) - g_init_rx;
+            const tx = parseInt(parts[9]) - g_init_tx;
             res.rx += rx;
             res.tx += tx;
         }
+        g_last_rx = res.rx;
+        g_last_tx = res.tx;
+        if (g_init_rx === 0 && g_init_tx === 0) {
+            g_init_tx = res.tx;
+            g_init_rx = res.rx;
+        }
+
         res.speed_rx = (res.rx - last_rx);
         res.speed_tx = (res.tx - last_tx);
         res.speed_mix = res.speed_rx + res.speed_tx;
