@@ -18,7 +18,6 @@ export default function App({
     ...prev,
     ...(typeof next == 'function' ? next(prev) : next)
   }), {
-    // TODO: add more state variables as needed
     config: baka.config,
     stats: {
       total: 0,
@@ -35,30 +34,35 @@ export default function App({
   const echoQueue = useRef(new Denque([], {
     capacity: 5
   }));
+  const clockTimer = useRef(null);
   useEffect(() => {
-    baka.on('init', () => {
+    clockTimer.current = setInterval(() => {
       setState({
-        config: baka.config
+        config: baka.config,
+        stats: baka.stats,
+        alives: mySlice(baka.sheet.alives, 5),
+        results: getQueTail(baka.sheet.results, 10),
+        errors: getQueTail(baka.sheet.errors, 5),
+        echoBuffer: echoQueue.current.toArray()
       });
+    }, 1000);
+    baka.on('init', () => {
+      // setState({ config: baka.config });
     });
     baka.on('pickup', (/** @type {BaseTask} */task) => {
-      setState({
-        stats: {
-          ...baka.stats
-        },
-        alives: mySlice(baka.sheet.alives, 5)
-      });
+      // setState({
+      //   stats: { ...baka.stats },
+      //   alives: mySlice(baka.sheet.alives, 5),
+      // });
       baka.emit('echo', `Task ${task.title} started. ${echoQueue.current.size()}`);
     });
     baka.on('popup', (/** @type {BaseTask} */task) => {
-      setState({
-        stats: {
-          ...baka.stats
-        },
-        alives: mySlice(baka.sheet.alives, 5),
-        results: getQueTail(baka.sheet.results, 10),
-        errors: getQueTail(baka.sheet.errors, 5)
-      });
+      // setState({
+      //   stats: { ...baka.stats },
+      //   alives: mySlice(baka.sheet.alives, 5),
+      //   results: getQueTail(baka.sheet.results, 10),
+      //   errors: getQueTail(baka.sheet.errors, 5),
+      // });
       baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
     });
     baka.on('progress', (/** @type {BaseTask} */task) => {
@@ -66,9 +70,9 @@ export default function App({
     });
     baka.on('echo', (/** @type {String} */msg) => {
       echoQueue.current.push(`[${formatTime()}] ${msg}`);
-      setState({
-        echoBuffer: echoQueue.current.toArray()
-      });
+      // setState({
+      //   echoBuffer: echoQueue.current.toArray()
+      // });
     });
   }, [baka]);
   return /*#__PURE__*/React.createElement(MemoBox, {
