@@ -4,13 +4,17 @@ import Baka from './baka.js';
 import Denque from 'denque';
 import BaseTask from './tasks/base.js';
 
+
+const MemoBox = React.memo(Box);
+const MemoText = React.memo(Text); 
+
 /**
  * 
  * @param {{baka:Baka}} props 
  * @returns 
  */
 export default function App({ baka }) {
-  const [state, setState] = useReducer((prev, next) => ({ ...prev, ...(typeof next == 'function' ? next() : next) }), {
+  const [state, setState] = useReducer((prev, next) => ({ ...prev, ...(typeof next == 'function' ? next(prev) : next) }), {
     // TODO: add more state variables as needed
     config: baka.config,
     stats: {
@@ -27,7 +31,7 @@ export default function App({ baka }) {
   });
 
   const echoQueue = useRef(new Denque([], { capacity: 5 }));
-
+  
   useEffect(() => {
     baka.on('init', () => {
       setState({ config: baka.config });
@@ -61,87 +65,87 @@ export default function App({ baka }) {
     })
   }, [baka]);
   return (
-    <Box height="auto" flexDirection="column">
-      <Text>
+    <MemoBox height="auto" flexDirection="column">
+      <MemoText>
         {state.config.name} -{state.config.maxConcurrent}{' '}
         {state.config.delay}+{state.config.delayPlus}ms{' '}
         {state.config.pickupCount}+{state.config.pickupCountPlus}u
-      </Text>
+      </MemoText>
       <EchoView texts={state.echoBuffer} />
       {/* ---------------- */}
 
-      <Box height={5} flexDirection="column" >
-        {state.alives[0].map((v, i) => <Text key={i}>
-          <Text color="magentaBright">* {v.title}</Text>
-        </Text>)}
-        {state.alives[2] != 0 && <Text>
-          <Text color="magenta">...{state.alives[2]} items hidden</Text>
-        </Text>}
-        {state.alives[1].map((v, i) => <Text key={i}>
-          <Text color="magentaBright">* {v.title}</Text>
-        </Text>)}
+      <MemoBox height={5} flexDirection="column" >
+        {state.alives[0].map((v, i) => <MemoText key={i}>
+          <MemoText color="magentaBright">* {v.title}</MemoText>
+        </MemoText>)}
+        {state.alives[2] != 0 && <MemoText>
+          <MemoText color="magenta">...{state.alives[2]} items hidden</MemoText>
+        </MemoText>}
+        {state.alives[1].map((v, i) => <MemoText key={i}>
+          <MemoText color="magentaBright">* {v.title}</MemoText>
+        </MemoText>)}
 
-      </Box>
+      </MemoBox>
       {/* ---------------- */}
-      {/* <Box flexDirection="column" height={5}>
+      {/* <MemoBox flexDirection="column" height={5}>
         {state.errors.map((item, index) => (
-          <Text key={index} color="whiteBright">
-            <Text color="red">o </Text>
+          <MemoText key={index} color="whiteBright">
+            <MemoText color="red">o </MemoText>
             {item?.title}
-          </Text>
+          </MemoText>
         ))}
-      </Box> */}
+      </MemoBox> */}
 
       {/* ---------------- */}
-      <Box flexDirection="column" height={10}>
+      <MemoBox flexDirection="column" height={10}>
 
         {state.results.map((item, index) => (
-          <Text key={index} color="blueBright">
-            <Text color="blue">o </Text>
+          <MemoText key={index} color="blueBright">
+            <MemoText color="blue">o </MemoText>
             {item?.title}
-          </Text>
+          </MemoText>
         ))}
-      </Box>
+      </MemoBox>
       {/* ---------------- */}
       <StatsView {...state.stats} />
-    </Box>
+    </MemoBox>
 
   );
 }
 
 // function listView({ items, color = 'white' }) {
 //   return (
-//     <Box flexDirection="column">
+//     <MemoBox flexDirection="column">
 //       {items.map((item, index) => (
-//         <Text key={index} color={color}>{item}</Text>
+//         <MemoText key={index} color={color}>{item}</MemoText>
 //       ))}
-//     </Box>
+//     </MemoBox>
 //   );
 // }
 
 
 function StatsView({ total, alive, ok, fail, err }) {
   return (
-    <Box flexDirection="column">
-      <Text>
+    <MemoBox flexDirection="column">
+      <MemoText>
         Total: {total}{'  '}
         Alive: {alive}{'  '}
         OK: {ok}{'  '}
         Fail: {fail}{'  '}
         Err: {err}{' '}
-      </Text>
-    </Box>
+      </MemoText>
+    </MemoBox>
   );
 }
 
 
 function EchoView({ texts }) {
   return (
-    <Box flexDirection="column" height={5}>
+    <MemoBox flexDirection="column" height={5}>
       {texts.map((text, index) => (
-        <Text key={index} color="gray">{text}</Text>
+        <MemoText key={index} color="gray">{text}</MemoText>
       ))}
-    </Box>
+    </MemoBox>
   );
 }
 

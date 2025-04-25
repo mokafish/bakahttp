@@ -3,6 +3,8 @@ import { Box, Text } from 'ink';
 import Baka from './baka.js';
 import Denque from 'denque';
 import BaseTask from './tasks/base.js';
+const MemoBox = /*#__PURE__*/React.memo(Box);
+const MemoText = /*#__PURE__*/React.memo(Text);
 
 /**
  * 
@@ -14,7 +16,7 @@ export default function App({
 }) {
   const [state, setState] = useReducer((prev, next) => ({
     ...prev,
-    ...(typeof next == 'function' ? next() : next)
+    ...(typeof next == 'function' ? next(prev) : next)
   }), {
     // TODO: add more state variables as needed
     config: baka.config,
@@ -69,42 +71,42 @@ export default function App({
       });
     });
   }, [baka]);
-  return /*#__PURE__*/React.createElement(Box, {
+  return /*#__PURE__*/React.createElement(MemoBox, {
     height: "auto",
     flexDirection: "column"
-  }, /*#__PURE__*/React.createElement(Text, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(EchoView, {
+  }, /*#__PURE__*/React.createElement(MemoText, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(EchoView, {
     texts: state.echoBuffer
-  }), /*#__PURE__*/React.createElement(Box, {
+  }), /*#__PURE__*/React.createElement(MemoBox, {
     height: 5,
     flexDirection: "column"
-  }, state.alives[0].map((v, i) => /*#__PURE__*/React.createElement(Text, {
+  }, state.alives[0].map((v, i) => /*#__PURE__*/React.createElement(MemoText, {
     key: i
-  }, /*#__PURE__*/React.createElement(Text, {
+  }, /*#__PURE__*/React.createElement(MemoText, {
     color: "magentaBright"
-  }, "* ", v.title))), state.alives[2] != 0 && /*#__PURE__*/React.createElement(Text, null, /*#__PURE__*/React.createElement(Text, {
+  }, "* ", v.title))), state.alives[2] != 0 && /*#__PURE__*/React.createElement(MemoText, null, /*#__PURE__*/React.createElement(MemoText, {
     color: "magenta"
-  }, "...", state.alives[2], " items hidden")), state.alives[1].map((v, i) => /*#__PURE__*/React.createElement(Text, {
+  }, "...", state.alives[2], " items hidden")), state.alives[1].map((v, i) => /*#__PURE__*/React.createElement(MemoText, {
     key: i
-  }, /*#__PURE__*/React.createElement(Text, {
+  }, /*#__PURE__*/React.createElement(MemoText, {
     color: "magentaBright"
-  }, "* ", v.title)))), /*#__PURE__*/React.createElement(Box, {
+  }, "* ", v.title)))), /*#__PURE__*/React.createElement(MemoBox, {
     flexDirection: "column",
     height: 10
-  }, state.results.map((item, index) => /*#__PURE__*/React.createElement(Text, {
+  }, state.results.map((item, index) => /*#__PURE__*/React.createElement(MemoText, {
     key: index,
     color: "blueBright"
-  }, /*#__PURE__*/React.createElement(Text, {
+  }, /*#__PURE__*/React.createElement(MemoText, {
     color: "blue"
   }, "o "), item?.title))), /*#__PURE__*/React.createElement(StatsView, state.stats));
 }
 
 // function listView({ items, color = 'white' }) {
 //   return (
-//     <Box flexDirection="column">
+//     <MemoBox flexDirection="column">
 //       {items.map((item, index) => (
-//         <Text key={index} color={color}>{item}</Text>
+//         <MemoText key={index} color={color}>{item}</MemoText>
 //       ))}
-//     </Box>
+//     </MemoBox>
 //   );
 // }
 
@@ -115,17 +117,17 @@ function StatsView({
   fail,
   err
 }) {
-  return /*#__PURE__*/React.createElement(Box, {
+  return /*#__PURE__*/React.createElement(MemoBox, {
     flexDirection: "column"
-  }, /*#__PURE__*/React.createElement(Text, null, "Total: ", total, '  ', "Alive: ", alive, '  ', "OK: ", ok, '  ', "Fail: ", fail, '  ', "Err: ", err, ' '));
+  }, /*#__PURE__*/React.createElement(MemoText, null, "Total: ", total, '  ', "Alive: ", alive, '  ', "OK: ", ok, '  ', "Fail: ", fail, '  ', "Err: ", err, ' '));
 }
 function EchoView({
   texts
 }) {
-  return /*#__PURE__*/React.createElement(Box, {
+  return /*#__PURE__*/React.createElement(MemoBox, {
     flexDirection: "column",
     height: 5
-  }, texts.map((text, index) => /*#__PURE__*/React.createElement(Text, {
+  }, texts.map((text, index) => /*#__PURE__*/React.createElement(MemoText, {
     key: index,
     color: "gray"
   }, text)));
