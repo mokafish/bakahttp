@@ -61,7 +61,7 @@ async function getNetworkStats(last_rx, last_tx) {
 }
 
 
-export function readableBytes(bytes = 0, units = ['B', 'K', 'M', 'G', 'T','P']) {
+export function readableBytes(bytes = 0, units = ['B', 'KB', 'MB', 'GB', 'TB','PB']) {
     let i = 0;
     while (i < units.length - 1 && bytes >= 1024) {
         bytes /= 1024;

@@ -44,7 +44,7 @@ export default class SleepTask extends BaseTask {
    */
   async run() {
     if (this.duration > 14000) {
-      throw new Error('Invalid duration');
+      throw new Error('Invalid looooooooooooooooooooooooooooooooong duration');
     }
 
     // 分阶段休眠（每1秒触发进度事件）

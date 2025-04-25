@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useRef, useState } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Newline, Text } from 'ink';
 import Baka from './baka.js';
 import Denque from 'denque';
 import BaseTask from './tasks/base.js';
@@ -25,7 +25,7 @@ export default function App({ baka }) {
     },
     alives: [[], [], 0],
     results: [],
-    errors: [],
+    // errors: [],
     echoBuffer: [],
     perf: {
       cpu: '--',
@@ -76,7 +76,7 @@ export default function App({ baka }) {
         stats: { ...baka.stats },
         alives: mySlice(baka.sheet.alives, 5),
         results: getQueTail(baka.sheet.results, 10),
-        errors: getQueTail(baka.sheet.errors, 5),
+        // errors: getQueTail(baka.sheet.errors, 5),
       });
       // baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
 
@@ -92,8 +92,8 @@ export default function App({ baka }) {
       // baka.emit('echo', `tick`);
     });
 
-    baka.on('catch', (err, task) => {
-      baka.emit('echo', `catch ${err.name}`);
+    baka.on('catch', (err, /** @type {BaseTask} */ task) => {
+      baka.emit('echo', `${task.title}|${err}`);
     });
     baka.on('check', (health) => {
       baka.emit('echo', `check health: ${health}`);
@@ -184,7 +184,7 @@ function StatsView({ total, alive, ok, fail, err }) {
 function PerfView({ cpu, mem, rx, tx, sp }) {
   return (
     <MemoBox>
-      <MemoBox flexDirection="column" width={15} height={2}> 
+      <MemoBox flexDirection="column" width={15} height={2}>
         <MemoText>
           CPU: {cpu}
         </MemoText>
@@ -192,7 +192,7 @@ function PerfView({ cpu, mem, rx, tx, sp }) {
           MEM: {mem}
         </MemoText>
       </MemoBox>
-      <MemoBox flexDirection="column" width={15} height={2}> 
+      <MemoBox flexDirection="column" width={15} height={2}>
         <MemoText>
           TX: {tx}
         </MemoText>
@@ -200,7 +200,7 @@ function PerfView({ cpu, mem, rx, tx, sp }) {
           RX: {rx}
         </MemoText>
       </MemoBox>
-      <MemoBox flexDirection="column" width={15} height={2}> 
+      <MemoBox flexDirection="column" width={15} height={2}>
         <MemoText>
           PS: N/A {/* package speed  */}
         </MemoText>
@@ -216,10 +216,12 @@ function PerfView({ cpu, mem, rx, tx, sp }) {
 
 function EchoView({ texts, height = 5, ...props }) {
   return (
-    <MemoBox flexDirection="column" height={height} {...props}>
-      {texts.map((text, index) => (
-        <MemoText key={index} color="gray">{text}</MemoText>
-      ))}
+    <MemoBox flexDirection="column" overflow="hidden" height={height} {...props}>
+      <MemoText color="gray">
+        {texts.map((text, index) => (
+          <MemoText key={index}>{text}<Newline /></MemoText>
+        ))}
+      </MemoText>
     </MemoBox>
   );
 }

@@ -1,6 +1,6 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import React, { useReducer, useEffect, useRef, useState } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Newline, Text } from 'ink';
 import Baka from './baka.js';
 import Denque from 'denque';
 import BaseTask from './tasks/base.js';
@@ -30,7 +30,7 @@ export default function App({
     },
     alives: [[], [], 0],
     results: [],
-    errors: [],
+    // errors: [],
     echoBuffer: [],
     perf: {
       cpu: '--',
@@ -84,8 +84,8 @@ export default function App({
           ...baka.stats
         },
         alives: mySlice(baka.sheet.alives, 5),
-        results: getQueTail(baka.sheet.results, 10),
-        errors: getQueTail(baka.sheet.errors, 5)
+        results: getQueTail(baka.sheet.results, 10)
+        // errors: getQueTail(baka.sheet.errors, 5),
       });
       // baka.emit('echo', `Task ${task.title} finished. ${baka.sheet.results.length} cache.`);
     });
@@ -98,8 +98,8 @@ export default function App({
       });
       // baka.emit('echo', `tick`);
     });
-    baka.on('catch', (err, task) => {
-      baka.emit('echo', `catch ${err.name}`);
+    baka.on('catch', (err, /** @type {BaseTask} */task) => {
+      baka.emit('echo', `${task.title}|${err}`);
     });
     baka.on('check', health => {
       baka.emit('echo', `check health: ${health}`);
@@ -191,11 +191,13 @@ function EchoView({
 }) {
   return /*#__PURE__*/React.createElement(MemoBox, _extends({
     flexDirection: "column",
+    overflow: "hidden",
     height: height
-  }, props), texts.map((text, index) => /*#__PURE__*/React.createElement(MemoText, {
-    key: index,
+  }, props), /*#__PURE__*/React.createElement(MemoText, {
     color: "gray"
-  }, text)));
+  }, texts.map((text, index) => /*#__PURE__*/React.createElement(MemoText, {
+    key: index
+  }, text, /*#__PURE__*/React.createElement(Newline, null)))));
 }
 
 /**
