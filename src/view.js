@@ -103,11 +103,7 @@ export default function App({ baka }) {
           {state.config.pickupCount}+{state.config.pickupCountPlus}u
         </MemoText>
         <StatsView {...state.stats} />
-        <MemoBox>
-          {Object.keys(state.perf).map((key) => <MemoText key={key}>
-            {key}: {state.perf[key]}
-          </MemoText>)}
-        </MemoBox>
+        <PerfView {...state.perf} />
 
       </MemoBox>
 
@@ -178,6 +174,38 @@ function StatsView({ total, alive, ok, fail, err }) {
   );
 }
 
+function PerfView({ cpu, mem, rx, tx, sp }) {
+  return (
+    <MemoBox>
+      <MemoBox flexDirection="column" width={15} height={2}> 
+        <MemoText>
+          CPU: {cpu}
+        </MemoText>
+        <MemoText>
+          MEM: {mem}
+        </MemoText>
+      </MemoBox>
+      <MemoBox flexDirection="column" width={15} height={2}> 
+        <MemoText>
+          TX: {tx}
+        </MemoText>
+        <MemoText>
+          RX: {rx}
+        </MemoText>
+      </MemoBox>
+      <MemoBox flexDirection="column" width={15} height={2}> 
+        <MemoText>
+          PS: N/A
+        </MemoText>
+        <MemoText>
+          BS: {sp}
+        </MemoText>
+      </MemoBox>
+    </MemoBox>
+
+  );
+}
+
 
 function EchoView({ texts, height = 5, ...props }) {
   return (
@@ -237,7 +265,7 @@ function formatTime(date = null) {
 
 /**
  * @description 格式化性能数据
- * @param {typeof Baka().perf} perf - 性能数据对象
+ * @param {typeof Baka().perf} raw_perf - 性能数据对象
  */
 function readablePerf(raw_perf) {
   return {
@@ -245,6 +273,6 @@ function readablePerf(raw_perf) {
     mem: adaptiveToFixed(raw_perf.mem) + '%',
     rx: readableBytes(raw_perf.net_rx),
     tx: readableBytes(raw_perf.net_tx),
-    sp: readableBytes(raw_perf.net_speed_mix) + '/s',
+    sp: readableBytes(raw_perf.net_sp) + '/s',
   };
 }

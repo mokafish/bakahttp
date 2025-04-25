@@ -105,9 +105,7 @@ export default function App({
   }, /*#__PURE__*/React.createElement(MemoBox, {
     height: 4,
     flexDirection: "column"
-  }, /*#__PURE__*/React.createElement(MemoText, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(StatsView, state.stats), /*#__PURE__*/React.createElement(MemoBox, null, Object.keys(state.perf).map(key => /*#__PURE__*/React.createElement(MemoText, {
-    key: key
-  }, key, ": ", state.perf[key])))), /*#__PURE__*/React.createElement(EchoView, {
+  }, /*#__PURE__*/React.createElement(MemoText, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(StatsView, state.stats), /*#__PURE__*/React.createElement(PerfView, state.perf)), /*#__PURE__*/React.createElement(EchoView, {
     texts: state.echoBuffer,
     height: 5
   }), /*#__PURE__*/React.createElement(MemoBox, {
@@ -158,6 +156,27 @@ function StatsView({
   return /*#__PURE__*/React.createElement(MemoBox, {
     flexDirection: "column"
   }, /*#__PURE__*/React.createElement(MemoText, null, "Total: ", total, '  ', "Alive: ", alive, '  ', "OK: ", ok, '  ', "Fail: ", fail, '  ', "Err: ", err, ' '));
+}
+function PerfView({
+  cpu,
+  mem,
+  rx,
+  tx,
+  sp
+}) {
+  return /*#__PURE__*/React.createElement(MemoBox, null, /*#__PURE__*/React.createElement(MemoBox, {
+    flexDirection: "column",
+    width: 15,
+    height: 2
+  }, /*#__PURE__*/React.createElement(MemoText, null, "CPU: ", cpu), /*#__PURE__*/React.createElement(MemoText, null, "MEM: ", mem)), /*#__PURE__*/React.createElement(MemoBox, {
+    flexDirection: "column",
+    width: 15,
+    height: 2
+  }, /*#__PURE__*/React.createElement(MemoText, null, "TX: ", tx), /*#__PURE__*/React.createElement(MemoText, null, "RX: ", rx)), /*#__PURE__*/React.createElement(MemoBox, {
+    flexDirection: "column",
+    width: 15,
+    height: 2
+  }, /*#__PURE__*/React.createElement(MemoText, null, "PS: N/A"), /*#__PURE__*/React.createElement(MemoText, null, "BS: ", sp)));
 }
 function EchoView({
   texts,
@@ -216,7 +235,7 @@ function formatTime(date = null) {
 
 /**
  * @description 格式化性能数据
- * @param {typeof Baka().perf} perf - 性能数据对象
+ * @param {typeof Baka().perf} raw_perf - 性能数据对象
  */
 function readablePerf(raw_perf) {
   return {
@@ -224,6 +243,6 @@ function readablePerf(raw_perf) {
     mem: adaptiveToFixed(raw_perf.mem) + '%',
     rx: readableBytes(raw_perf.net_rx),
     tx: readableBytes(raw_perf.net_tx),
-    sp: readableBytes(raw_perf.net_speed_mix) + '/s'
+    sp: readableBytes(raw_perf.net_sp) + '/s'
   };
 }

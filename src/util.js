@@ -60,7 +60,7 @@ export function readableBytes(bytes = 0, units = ['B', 'KB', 'MB', 'GB', 'TB']) 
     }
 
     let n = adaptiveToFixed(bytes)
-    return `${n} ${units[i]}`;
+    return `${n}${units[i]}`;
 }
 
 export function adaptiveToFixed(n) {

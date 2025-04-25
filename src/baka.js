@@ -3,6 +3,7 @@ import Denque from 'denque';
 import BaseTask from './tasks/base.js';
 import { performance } from 'perf_hooks';
 import { perfStats } from './util.js'
+import { adaptiveToFixed, readableBytes } from './util.js';
 
 /**
  * @typedef {import('./tasks/base.js').TaskConfig} TaskConfig
@@ -144,8 +145,6 @@ export default class ManagerModel extends EventEmitter {
     });
 
     this.emit('pickup', task);
-    this.emit('echo', 'baka pickup');
-
     return task;
   }
 
@@ -157,6 +156,25 @@ export default class ManagerModel extends EventEmitter {
   async start() {
     if (this.running) return;
     this.running = true;
+
+    this.clock_timer = setInterval(async () =>{
+      this.tick();
+    }, 1000);
+    
+    // 健康检查定时器
+    this.healthCheckTimer = setInterval(async () => {
+      // PERFORMANCE: 这里可以考虑不转换数据结构，直接传递引用
+      const health = await this.TaskFactoryClass.check(
+        [...this.sheet.alives],
+        this.sheet.results.toArray(),
+        this.sheet.errors.toArray(),
+        this.healthHistory.toArray()
+      );
+      this.healthHistory.push(health);
+      this.emit('check', health);
+    }, this.config.check);
+
+    this.emit('start');
 
     // 任务接取循环
     while (this.running) {
@@ -177,38 +195,20 @@ export default class ManagerModel extends EventEmitter {
               task.emit('end');
             }
           })()
-
         }
       }
       await this.TaskFactoryClass.delay();
     }
-
-    this.emit('start');
-
-    // 健康检查定时器
-    this.healthCheckTimer = setInterval(async () => {
-      // PERFORMANCE: 这里可以考虑不转换数据结构，直接传递引用
-      const health = await this.TaskFactoryClass.check(
-        [...this.sheet.alives],
-        this.sheet.results.toArray(),
-        this.sheet.errors.toArray(),
-        this.healthHistory.toArray()
-      );
-      this.healthHistory.push(health);
-      this.emit('check', health);
-    }, this.config.check);
-
-    this.clock_timer = setInterval(this.tick, 1000);
   }
 
 
   async tick() {
     try {
-      this.emit('echo', 'tick start');
+      // this.emit('echo', 'tick start');
       this.clock_now = performance.now() - this.clock_init;
-      this.perf = perfStats();
+      this.perf = await perfStats();
       this.emit('tick');
-      this.emit('echo', 'tick end');
+      // this.emit('echo', 'tick end');
 
     }
     catch (err) {
@@ -226,4 +226,3 @@ export default class ManagerModel extends EventEmitter {
     this.emit('pause');
   }
 }
-
