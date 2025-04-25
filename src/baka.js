@@ -1,6 +1,8 @@
 import EventEmitter from 'events';
 import Denque from 'denque';
 import BaseTask from './tasks/base.js';
+import { performance } from 'perf_hooks';
+import { perfStats } from './util.js'
 
 /**
  * @typedef {import('./tasks/base.js').TaskConfig} TaskConfig
@@ -81,6 +83,19 @@ export default class ManagerModel extends EventEmitter {
       err: 0,
     };
 
+    this.perf = {
+      cpu: 0,
+      mem: 0,
+      net_rx: 0,
+      net_tx: 0,
+      net_sp: 0
+    };
+
+    this.clock_init = performance.now()
+    this.clock_now = 0;
+    this.clock_timer = null;
+
+
     /** @member {number|null} healthCheckTimer - 健康检查定时器ID */
     this.healthCheckTimer = null;
 
@@ -129,6 +144,7 @@ export default class ManagerModel extends EventEmitter {
     });
 
     this.emit('pickup', task);
+    this.emit('echo', 'baka pickup');
 
     return task;
   }
@@ -141,7 +157,6 @@ export default class ManagerModel extends EventEmitter {
   async start() {
     if (this.running) return;
     this.running = true;
-
 
     // 任务接取循环
     while (this.running) {
@@ -183,6 +198,22 @@ export default class ManagerModel extends EventEmitter {
       this.emit('check', health);
     }, this.config.check);
 
+    this.clock_timer = setInterval(this.tick, 1000);
+  }
+
+
+  async tick() {
+    try {
+      this.emit('echo', 'tick start');
+      this.clock_now = performance.now() - this.clock_init;
+      this.perf = perfStats();
+      this.emit('tick');
+      this.emit('echo', 'tick end');
+
+    }
+    catch (err) {
+      this.emit('echo', err + '');
+    }
   }
 
   /**
@@ -191,6 +222,7 @@ export default class ManagerModel extends EventEmitter {
   pause() {
     this.running = false;
     clearInterval(this.healthCheckTimer);
+    clearInterval(this.clock_timer);
     this.emit('pause');
   }
 }

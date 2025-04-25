@@ -1,9 +1,9 @@
-import React, { useReducer, useEffect, useRef } from 'react';
+import React, { useReducer, useEffect, useRef, useState } from 'react';
 import { Box, Text } from 'ink';
 import Baka from './baka.js';
 import Denque from 'denque';
 import BaseTask from './tasks/base.js';
-
+import { adaptiveToFixed, readableBytes } from './util.js';
 
 const MemoBox = React.memo(Box);
 const MemoText = React.memo(Text);
@@ -27,21 +27,30 @@ export default function App({ baka }) {
     results: [],
     errors: [],
     echoBuffer: [],
+    perf: {
+      cpu: '--',
+      mem: '--',
+      rx: '--',
+      tx: '--',
+      sp: '--',
+    }
   });
+
+
 
   const echoQueue = useRef(new Denque([], { capacity: 5 }));
   const refreshTimer = useRef(null);
   useEffect(() => {
     // Interval refresh mode
     // refreshTimer.current = setInterval(() => {
-    //   setState({
-    //     config: baka.config,
-    //     stats:  baka.stats,
-    //     alives: mySlice(baka.sheet.alives, 5),
-    //     results: getQueTail(baka.sheet.results, 10),
-    //     errors: getQueTail(baka.sheet.errors, 5),
-    //     echoBuffer: echoQueue.current.toArray()
-    //   });
+    // setState({
+    //   config: baka.config,
+    //   stats:  baka.stats,
+    //   alives: mySlice(baka.sheet.alives, 5),
+    //   results: getQueTail(baka.sheet.results, 10),
+    //   errors: getQueTail(baka.sheet.errors, 5),
+    //   echoBuffer: echoQueue.current.toArray()
+    // });
     // }, 1000);
 
     // quickly refresh mode
@@ -60,7 +69,7 @@ export default function App({ baka }) {
         stats: { ...baka.stats },
         alives: mySlice(baka.sheet.alives, 5),
       });
-      baka.emit('echo', `pickup ${task.title}`);
+      // baka.emit('echo', `pickup ${task.title}`);
     });
     baka.on('popup', (/** @type {BaseTask} */ task) => {
       setState({
@@ -76,6 +85,12 @@ export default function App({ baka }) {
       // TODO: handle progress event
     });
 
+    baka.on('tick', () => {
+      setState({
+        perf: readablePerf(baka.perf),
+      })
+      baka.emit('echo', `tick`);
+    })
 
   }, [baka]);
   return (
@@ -88,6 +103,12 @@ export default function App({ baka }) {
           {state.config.pickupCount}+{state.config.pickupCountPlus}u
         </MemoText>
         <StatsView {...state.stats} />
+        <MemoBox>
+          {Object.keys(state.perf).map((key) => <MemoText key={key}>
+            {key}: {state.perf[key]}
+          </MemoText>)}
+        </MemoBox>
+
       </MemoBox>
 
       {/* echo messages ---------------- */}
@@ -117,15 +138,15 @@ export default function App({ baka }) {
       {/* alives ---------------- */}
       <MemoBox height={5} flexDirection="column" >
         {state.alives[0].map((/** @type {BaseTask} */ v, i) => <MemoText key={i}>
-            <MemoText color="magenta">[{formatTime(v.start_time)}] </MemoText>
-            <MemoText color="magentaBright">{v.title}</MemoText>
+          <MemoText color="magenta">[{formatTime(v.start_time)}] </MemoText>
+          <MemoText color="magentaBright">{v.title}</MemoText>
         </MemoText>)}
         {state.alives[2] != 0 && <MemoText>
-          <MemoText color="magenta">{'  ...'}{state.alives[2]} alive task items hidden</MemoText>
+          <MemoText color="magenta">{' ... '}{state.alives[2]} more alives ...</MemoText>
         </MemoText>}
         {state.alives[1].map((/** @type {BaseTask} */ v, i) => <MemoText key={i}>
-            <MemoText color="magenta">[{formatTime(v.start_time)}] </MemoText>
-            <MemoText color="magentaBright">{v.title}</MemoText>
+          <MemoText color="magenta">[{formatTime(v.start_time)}] </MemoText>
+          <MemoText color="magentaBright">{v.title}</MemoText>
         </MemoText>)}
       </MemoBox>
     </MemoBox>
@@ -212,4 +233,18 @@ const timeFormatter = new Intl.DateTimeFormat('en-GB', {
 function formatTime(date = null) {
   date = date || new Date();
   return timeFormatter.format(date);
+}
+
+/**
+ * @description 格式化性能数据
+ * @param {typeof Baka().perf} perf - 性能数据对象
+ */
+function readablePerf(raw_perf) {
+  return {
+    cpu: adaptiveToFixed(raw_perf.cpu) + '%',
+    mem: adaptiveToFixed(raw_perf.mem) + '%',
+    rx: readableBytes(raw_perf.net_rx),
+    tx: readableBytes(raw_perf.net_tx),
+    sp: readableBytes(raw_perf.net_speed_mix) + '/s',
+  };
 }

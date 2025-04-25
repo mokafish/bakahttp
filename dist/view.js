@@ -1,9 +1,10 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-import React, { useReducer, useEffect, useRef } from 'react';
+import React, { useReducer, useEffect, useRef, useState } from 'react';
 import { Box, Text } from 'ink';
 import Baka from './baka.js';
 import Denque from 'denque';
 import BaseTask from './tasks/base.js';
+import { adaptiveToFixed, readableBytes } from './util.js';
 const MemoBox = /*#__PURE__*/React.memo(Box);
 const MemoText = /*#__PURE__*/React.memo(Text);
 
@@ -30,7 +31,14 @@ export default function App({
     alives: [[], [], 0],
     results: [],
     errors: [],
-    echoBuffer: []
+    echoBuffer: [],
+    perf: {
+      cpu: '--',
+      mem: '--',
+      rx: '--',
+      tx: '--',
+      sp: '--'
+    }
   });
   const echoQueue = useRef(new Denque([], {
     capacity: 5
@@ -39,14 +47,14 @@ export default function App({
   useEffect(() => {
     // Interval refresh mode
     // refreshTimer.current = setInterval(() => {
-    //   setState({
-    //     config: baka.config,
-    //     stats:  baka.stats,
-    //     alives: mySlice(baka.sheet.alives, 5),
-    //     results: getQueTail(baka.sheet.results, 10),
-    //     errors: getQueTail(baka.sheet.errors, 5),
-    //     echoBuffer: echoQueue.current.toArray()
-    //   });
+    // setState({
+    //   config: baka.config,
+    //   stats:  baka.stats,
+    //   alives: mySlice(baka.sheet.alives, 5),
+    //   results: getQueTail(baka.sheet.results, 10),
+    //   errors: getQueTail(baka.sheet.errors, 5),
+    //   echoBuffer: echoQueue.current.toArray()
+    // });
     // }, 1000);
 
     // quickly refresh mode
@@ -68,7 +76,7 @@ export default function App({
         },
         alives: mySlice(baka.sheet.alives, 5)
       });
-      baka.emit('echo', `pickup ${task.title}`);
+      // baka.emit('echo', `pickup ${task.title}`);
     });
     baka.on('popup', (/** @type {BaseTask} */task) => {
       setState({
@@ -84,6 +92,12 @@ export default function App({
     baka.on('progress', (/** @type {BaseTask} */task) => {
       // TODO: handle progress event
     });
+    baka.on('tick', () => {
+      setState({
+        perf: readablePerf(baka.perf)
+      });
+      baka.emit('echo', `tick`);
+    });
   }, [baka]);
   return /*#__PURE__*/React.createElement(MemoBox, {
     height: 24,
@@ -91,7 +105,9 @@ export default function App({
   }, /*#__PURE__*/React.createElement(MemoBox, {
     height: 4,
     flexDirection: "column"
-  }, /*#__PURE__*/React.createElement(MemoText, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(StatsView, state.stats)), /*#__PURE__*/React.createElement(EchoView, {
+  }, /*#__PURE__*/React.createElement(MemoText, null, state.config.name, " -", state.config.maxConcurrent, ' ', state.config.delay, "+", state.config.delayPlus, "ms", ' ', state.config.pickupCount, "+", state.config.pickupCountPlus, "u"), /*#__PURE__*/React.createElement(StatsView, state.stats), /*#__PURE__*/React.createElement(MemoBox, null, Object.keys(state.perf).map(key => /*#__PURE__*/React.createElement(MemoText, {
+    key: key
+  }, key, ": ", state.perf[key])))), /*#__PURE__*/React.createElement(EchoView, {
     texts: state.echoBuffer,
     height: 5
   }), /*#__PURE__*/React.createElement(MemoBox, {
@@ -113,7 +129,7 @@ export default function App({
     color: "magentaBright"
   }, v.title))), state.alives[2] != 0 && /*#__PURE__*/React.createElement(MemoText, null, /*#__PURE__*/React.createElement(MemoText, {
     color: "magenta"
-  }, '  ...', state.alives[2], " alive task items hidden")), state.alives[1].map((/** @type {BaseTask} */v, i) => /*#__PURE__*/React.createElement(MemoText, {
+  }, ' ... ', state.alives[2], " more alives ...")), state.alives[1].map((/** @type {BaseTask} */v, i) => /*#__PURE__*/React.createElement(MemoText, {
     key: i
   }, /*#__PURE__*/React.createElement(MemoText, {
     color: "magenta"
@@ -196,4 +212,18 @@ const timeFormatter = new Intl.DateTimeFormat('en-GB', {
 function formatTime(date = null) {
   date = date || new Date();
   return timeFormatter.format(date);
+}
+
+/**
+ * @description 格式化性能数据
+ * @param {typeof Baka().perf} perf - 性能数据对象
+ */
+function readablePerf(raw_perf) {
+  return {
+    cpu: adaptiveToFixed(raw_perf.cpu) + '%',
+    mem: adaptiveToFixed(raw_perf.mem) + '%',
+    rx: readableBytes(raw_perf.net_rx),
+    tx: readableBytes(raw_perf.net_tx),
+    sp: readableBytes(raw_perf.net_speed_mix) + '/s'
+  };
 }
