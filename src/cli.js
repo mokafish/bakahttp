@@ -51,3 +51,4 @@ render(<App baka={bk} />);
 await bk.init();
 bk.start();
 
+
