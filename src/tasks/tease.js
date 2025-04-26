@@ -1,5 +1,12 @@
 import got from 'got';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 import BaseTask from './base.js';
+
+let param = {
+    url: 'http://httpbin.org/ip',
+    proxy: false,
+    _raw:[],
+}
 
 /**
  * @typedef {import('./tasks/base.js').TaskConfig} TaskConfig
@@ -27,7 +34,7 @@ export default class TeaseTask extends BaseTask {
     constructor() {
         // 在这里初始化任务的基本信息
         super();
-        this.title = `tease_${this.tid}`;
+        this.title = `tease_${this.tid} ${param._raw}`;
     }
 
     async init() {
@@ -48,5 +55,10 @@ export default class TeaseTask extends BaseTask {
         
         this.title += ` => ${data?.origin}`;
         this.emit('ok')
+    }
+
+    static async parseArgs(args) {
+        // NOTE: flag not received
+        param._raw = args;
     }
 }
