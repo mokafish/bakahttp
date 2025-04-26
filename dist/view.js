@@ -104,6 +104,7 @@ export default function App({
     baka.on('check', health => {
       baka.emit('echo', `check health: ${health}`);
     });
+    baka.emit('echo', 'application initialized.');
   }, [baka]);
   return /*#__PURE__*/React.createElement(MemoBox, {
     height: 24,

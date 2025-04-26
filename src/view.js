@@ -99,6 +99,8 @@ export default function App({ baka }) {
       baka.emit('echo', `check health: ${health}`);
     });
 
+    baka.emit('echo', 'application initialized.');
+
   }, [baka]);
   return (
     <MemoBox height={24} flexDirection="column">
