@@ -12,7 +12,7 @@ const cli = meow(`
   Options
     -c, --concurrent <num>  Set concurrent workers (default: 16)
     -d, --delay <min[-max]> Delay between cycle in milliseconds (default: 1-3)
-    -u, --unit <min[-max]>  Requests per cycle (no delay within cycle, default: 1)
+    -u, --unit <min[-max]>  Requests per cycle (default: 1)
     -H, --header <k:v>      Add custom request header (repeatable)
     -C, --cookies <file>    Load cookies.txt or cookies.json  from file
     -b, --body <file>       File to use as request body
@@ -108,8 +108,13 @@ const cli = meow(`
   }
 });
 
+if (cli.flags.body && cli.flags.method == 'GET') {
+  cli.flags.method = 'POST'
+}
 
 console.log('** flag:')
 console.log(cli.flags)
 console.log('** input:')
 console.log(cli.input)
+
+//  node play/app.js -c 8 -d 5-10 -u -1-5 -H user-agent:curl/1.0 --proxy http://127.0.0.1:8050 'http://example.com/{}' 1:
