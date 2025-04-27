@@ -5,8 +5,18 @@ import BaseTask from './base.js';
 let param = {
     url: 'http://httpbin.org/ip',
     proxy: false,
-    _raw:[],
+    _raw: [],
 }
+
+
+// const proxy = 'http://localhost:8050';
+const proxy = 'socks5://localhost:8050';
+if (proxy.startsWith('socks')) {
+    const agent = new SocksProxyAgent(proxy);
+} else {
+    const agent = proxy
+}
+
 
 /**
  * @typedef {import('./tasks/base.js').TaskConfig} TaskConfig
@@ -52,7 +62,7 @@ export default class TeaseTask extends BaseTask {
                 resolve();
             }, 3000);
         });
-        
+
         this.title += ` => ${data?.origin}`;
         this.emit('ok')
     }

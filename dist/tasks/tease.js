@@ -7,6 +7,14 @@ let param = {
   _raw: []
 };
 
+// const proxy = 'http://localhost:8050';
+const proxy = 'socks5://localhost:8050';
+if (proxy.startsWith('socks')) {
+  const agent = new SocksProxyAgent(proxy);
+} else {
+  const agent = proxy;
+}
+
 /**
  * @typedef {import('./tasks/base.js').TaskConfig} TaskConfig
  */
