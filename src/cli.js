@@ -88,7 +88,7 @@ const cli = meow(`
     run: {
       type: 'string',
       shortFlag: 'r',
-      default: 'tease' 
+      default: 'tease'
     },
     silent: {
       type: 'boolean',
@@ -126,11 +126,23 @@ if (cli.flags.body && cli.flags.method == 'GET') {
 /**
  * @type {typeof BaseTask}
  */
-let taskClass =  (await import(`./tasks/${cli.flags.run}.js`)).default;
-await taskClass.parseArgs(cli.input, cli.flags);
-let bk = new Baka(taskClass, {})
-cli.flags.silent || render(<App baka={bk} />);
-await bk.init();
-bk.start();
+let taskClass
+try {
+  taskClass = (await import(`./tasks/${cli.flags.run}.js`)).default;
+} catch (e) {
+  // skip
+}
+if (taskClass) {
+  await taskClass.parseArgs(cli.input, cli.flags);
+  let bk = new Baka(taskClass, {})
+  cli.flags.silent || render(<App baka={bk} />);
+  await bk.init();
+  bk.start();
+} else {
+  if(cli.flags.run == '504'){
+    (await import('./504server.js')).default()
+  }
+}
+
 
 
