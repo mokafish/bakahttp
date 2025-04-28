@@ -60,7 +60,7 @@ export default class TeaseTask extends BaseTask {
     // const proxy = 'socks5://localhost:8050';
     if (flags.proxy) {
       if (flags.proxy.startsWith('socks')) {
-        param.proxy = new SocksProxyAgent(proxy);
+        param.proxy = new SocksProxyAgent(flags.proxy);
       } else if (flags.proxy.startsWith('http')) {
         param.proxy = proxy;
       }
