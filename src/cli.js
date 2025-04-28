@@ -36,7 +36,7 @@ const cli = meow(`
     task: {
       type: 'string',
       shortFlag: 't',
-      default: 'sleep'
+      default: 'tease'
     },
   }
 });
