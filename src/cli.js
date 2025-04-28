@@ -45,7 +45,7 @@ let taskName = cli.flags.task;
 // let taskClass =  taskModule.default 
 // let taskClass =  SleepTask;
 let taskClass =  TeaseTask;
-await taskClass.parseArgs(cli.input);
+await taskClass.parseArgs(cli.input, cli.flags);
 let bk = new Baka(taskClass, {})
 render(<App baka={bk} />);
 await bk.init();

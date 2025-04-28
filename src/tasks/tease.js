@@ -8,14 +8,9 @@ let param = {
     _raw: [],
 }
 
+let global_request_option = {}
 
-// const proxy = 'http://localhost:8050';
-const proxy = 'socks5://localhost:8050';
-if (proxy.startsWith('socks')) {
-    const agent = new SocksProxyAgent(proxy);
-} else {
-    const agent = proxy
-}
+
 
 
 /**
@@ -44,7 +39,7 @@ export default class TeaseTask extends BaseTask {
     constructor() {
         // 在这里初始化任务的基本信息
         super();
-        this.title = `tease_${this.tid} ${param._raw}`;
+        this.title = `tease_${this.tid}  proxy:${param.proxy}`;
     }
 
     async init() {
@@ -55,7 +50,9 @@ export default class TeaseTask extends BaseTask {
     }
 
     async run() {
-        let data = await got.get(this.props.url).json();
+        let data = await got.get(this.props.url, {
+            ...global_request_option,
+        }).json();
 
         await new Promise((resolve) => {
             setTimeout(() => {
@@ -63,12 +60,26 @@ export default class TeaseTask extends BaseTask {
             }, 3000);
         });
 
-        this.title += ` => ${data?.origin}`;
+        this.title = `tease_${this.tid} => ${data?.origin}`;
         this.emit('ok')
     }
 
-    static async parseArgs(args) {
+    static async parseArgs(args, flags) {
         // NOTE: flag not received
         param._raw = args;
+        // const proxy = 'http://localhost:8050';
+        // const proxy = 'socks5://localhost:8050';
+        if (flags.proxy) {
+            if (flags.proxy.startsWith('socks')) {
+                param.proxy = new SocksProxyAgent(proxy);
+            } else if (flags.proxy.startsWith('http')) {
+                param.proxy = proxy
+            }
+            global_request_option.agent = {
+                http: param.proxy,
+                https: param.proxy,
+                http2: param.proxy,
+            }
+        }
     }
 }

@@ -228,7 +228,7 @@ export default class BaseTask extends EventEmitter {
         });
     }
 
-    static async parseArgs(args) {
+    static async parseArgs(args,flags) {
         // 
     }
 }
