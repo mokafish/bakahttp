@@ -73,7 +73,7 @@ export default class TeaseTask extends BaseTask {
             if (flags.proxy.startsWith('socks')) {
                 param.proxy = new SocksProxyAgent(flags.proxy);
             } else if (flags.proxy.startsWith('http')) {
-                param.proxy = proxy
+                param.proxy = flags.proxy
             }
             global_request_option.agent = {
                 http: param.proxy,
