@@ -129,7 +129,11 @@ try {
 }
 if (taskClass) {
   await taskClass.parseArgs(cli.input, cli.flags);
-  let bk = new Baka(taskClass, {});
+  /** @type {typeof taskClass.config} */
+  let overConfig = {
+    maxConcurrent: flags.concurrent
+  };
+  let bk = new Baka(taskClass, overConfig);
   cli.flags.silent || render(/*#__PURE__*/React.createElement(App, {
     baka: bk
   }));
