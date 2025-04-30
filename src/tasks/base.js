@@ -164,9 +164,9 @@ export default class BaseTask extends EventEmitter {
      */
     updateUsedTime() {
         if (this.state === 'running') {
-            this.used_time = (Date.now() - this.start_time) / 1000;
+            this.used_time = (Date.now() - this.start_time)
         } else if (this.state === 'end') {
-            this.used_time = (this.end_time - this.start_time) / 1000;
+            this.used_time = (this.end_time - this.start_time)
         }
     }
 

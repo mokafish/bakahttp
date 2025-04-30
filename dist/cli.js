@@ -125,6 +125,7 @@ try {
   taskClass = (await import(`./tasks/${cli.flags.run}.js`)).default;
 } catch (e) {
   // skip
+  console.log(e);
 }
 if (taskClass) {
   await taskClass.parseArgs(cli.input, cli.flags);
