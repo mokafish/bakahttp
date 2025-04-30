@@ -121,11 +121,11 @@ if (cli.flags.body && cli.flags.method == 'GET') {
  * @type {typeof BaseTask}
  */
 let taskClass;
+let load_err = null;
 try {
   taskClass = (await import(`./tasks/${cli.flags.run}.js`)).default;
 } catch (e) {
-  // skip
-  console.log(e);
+  load_err = e;
 }
 if (taskClass) {
   await taskClass.parseArgs(cli.input, cli.flags);
@@ -138,5 +138,7 @@ if (taskClass) {
 } else {
   if (cli.flags.run == '504') {
     (await import('./504server.js')).default();
+  } else {
+    console.log(load_err);
   }
 }
