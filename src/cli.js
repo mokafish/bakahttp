@@ -138,7 +138,7 @@ if (taskClass) {
   await taskClass.parseArgs(cli.input, cli.flags);
   /** @type {typeof taskClass.config} */
   let overConfig = {
-    maxConcurrent: flags.concurrent
+    maxConcurrent: cli.flags.concurrent
   }
   let bk = new Baka(taskClass, overConfig)
   cli.flags.silent || render(<App baka={bk} />);
