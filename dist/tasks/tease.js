@@ -67,8 +67,7 @@ export default class TeaseTask extends BaseTask {
     this.emit('ok');
     this.props.code = res.statusCode;
     this.props.len = res.body.length;
-    this.title = 't' + this.tid + ' => ' + this.props.code + ' ' + readableBytes(this.props.len);
-    +' ' + adaptiveToFixed(this.used_time / 1000) + 's';
+    this.title = 't_' + this.tid + ' => ' + this.props.code + ' ' + readableBytes(this.props.len) + ' ' + adaptiveToFixed(this.used_time / 1000) + 's';
   }
 
   /**
