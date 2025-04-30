@@ -129,9 +129,15 @@ try {
 }
 if (taskClass) {
   await taskClass.parseArgs(cli.input, cli.flags);
+  let [d, dp] = parseInputRange(cli.flags.delay);
+  let [u, up] = parseInputRange(cli.flags.unit);
   /** @type {typeof taskClass.config} */
   let overConfig = {
-    maxConcurrent: cli.flags.concurrent
+    maxConcurrent: cli.flags.concurrent,
+    delay: d * 1000,
+    delayPlus: dp * 1000,
+    pickupCount: u,
+    pickupCountPlus: up
   };
   let bk = new Baka(taskClass, overConfig);
   cli.flags.silent || render(/*#__PURE__*/React.createElement(App, {
@@ -144,5 +150,18 @@ if (taskClass) {
     (await import('./504server.js')).default();
   } else {
     console.log(load_err);
+  }
+}
+function parseInputRange(expr) {
+  const parts = expr.split('-');
+  if (parts.length === 2) {
+    const a = parseFloat(parts[0]);
+    const b = parseFloat(parts[1]);
+    const start = Math.min(a, b);
+    const end = Math.max(a, b);
+    return [start, end - start];
+  } else {
+    const num = parseFloat(expr);
+    return [num, 0];
   }
 }

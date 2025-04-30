@@ -59,7 +59,7 @@ export default class TeaseTask extends BaseTask {
     description: 'Tease task for testing',
     maxConcurrent: 12,
     delayPlus: 500,
-    checkDelay: 5000
+    checkDelay: 60000
   };
   constructor() {
     // 在这里初始化任务的基本信息
