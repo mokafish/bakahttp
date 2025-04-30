@@ -98,11 +98,11 @@ export default function App({
       });
       // baka.emit('echo', `tick`);
     });
-    baka.on('catch', (err, /** @type {BaseTask} */task) => {
-      baka.emit('echo', `${task.title}|${err}`);
+    baka.on('catch', (/** @type {Error} */err, /** @type {BaseTask} */task) => {
+      baka.emit('echo', `t${task.tid}: ${err?.name} ${err?.code} ${err?.message}`);
     });
     baka.on('check', health => {
-      baka.emit('echo', `check health: ${health}`);
+      baka.emit('echo', `check => health: ${health}`);
     });
     baka.emit('echo', 'application initialized.');
   }, [baka]);

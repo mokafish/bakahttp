@@ -102,10 +102,17 @@ export default class TeaseTask extends BaseTask {
   }
   async run() {
     /**@type {Response} */
+
+    // try {
     let res = await got(this.props.url, {
       headers: this.props.headers
       // TODO: cookiejar: ...
     }, common.req_opts);
+    // } catch(e) {
+    //     console.log(e);
+    //     process.exit(1)
+    // }
+
     this.updateUsedTime();
     this.emit('ok');
     this.props.code = res.statusCode;
@@ -129,14 +136,14 @@ export default class TeaseTask extends BaseTask {
     common.req_opts.method = flags.method;
     if (flags.proxy) {
       if (flags.proxy.startsWith('socks')) {
-        param.proxy = new SocksProxyAgent(flags.proxy);
+        common.proxy = new SocksProxyAgent(flags.proxy);
       } else if (flags.proxy.startsWith('http')) {
-        param.proxy = new HttpProxyAgent(flags.proxy);
+        common.proxy = new HttpProxyAgent(flags.proxy);
       }
       common.req_opts.agent = {
-        http: param.proxy,
-        https: param.proxy,
-        http2: param.proxy
+        http: common.proxy,
+        https: common.proxy,
+        http2: common.proxy
       };
     }
   }
