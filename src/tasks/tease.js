@@ -25,6 +25,10 @@ accept-language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
 let common = {
     url: 'http://httpbin.org/ip',
     rules: [],
+    input_header: '',
+    input_cookie: '',
+    input_body: '',
+    input_formdata: '',
     proxy: false,
     headers: {},
     req_opts: new Options({
@@ -34,6 +38,12 @@ let common = {
     }),
     /** @type {PropMaker} */
     iter_url: null,
+    /** @type {PropMaker} */
+    iter_header: null,
+    /** @type {PropMaker} */
+    iter_cookie: null,
+    /** @type {PropMaker} */
+    iter_body: null,
     iter_randip: new PropMaker('{}.{}.{}.{}', ['1-254', '1-254', '1-254', '1-254'])
 }
 
@@ -141,12 +151,12 @@ export default class TeaseTask extends BaseTask {
         [common.url = 'http://httpbin.org/delay/10', ...common.rules] = args;
         // TODO: 处理带分类前缀的规则组
         common.iter_url = new PropMaker(common.url, common.rules)
-        common.headers = mixHeader(COMMON_HEADERS_RAW.split('\n'))
+        common.headers = mixHeader(COMMON_HEADERS_RAW)
+        common.req_opts.method = flags.method
+        common.input_header = flags.header.join('\n')
+
         // flags.proxy = 'http://localhost:8050';
         // flags.proxy = 'socks5://localhost:8050';
-
-        common.req_opts.method = flags.method
-
         if (flags.proxy) {
             if (flags.proxy.startsWith('socks')) {
                 common.proxy = new SocksProxyAgent(flags.proxy);
@@ -161,15 +171,16 @@ export default class TeaseTask extends BaseTask {
         }
     }
 }
+
 /**
  * 合并HTTP头部行与默认值
- * @param {string[]} raw_lines 原始头部行数组
+ * @param {string} raw_text 原始头部文本
  * @param {Object} defaults 默认头部对象
  * @returns {Object} 合并后的头部对象
  */
-function mixHeader(raw_lines, defaults = {}) {
+function mixHeader(raw_text, defaults = {}) {
     let h = { ...defaults };
-    for (const line of raw_lines) {
+    for (const line of raw_text.split('\n')) {
         const colonIndex = line.indexOf(':');
         if (colonIndex === -1) continue; // 忽略无效行
         const key = line.slice(0, colonIndex).trim();
